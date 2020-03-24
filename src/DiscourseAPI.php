@@ -299,21 +299,19 @@ class DiscourseAPI {
 	//////////////   USERS
 
 	/**
-	 * createUser
+	 * log out user
 	 *
-	 * @param string $userName username of new user
+	 * @param string $userId
 	 *
 	 * @return mixed HTTP return code and API return object
 	 */
-	public function logoutUser( string $userName ) {
-		$userid = $this->getUserByUsername( $userName )->apiresult->user->id;
-		if ( ! \is_int( $userid ) ) {
+	public function logoutUser( string $userId ) {
+		if ( ! \is_int( $userId ) ) {
 			return false;
 		}
 
-		return $this->_postRequest( '/admin/users/' . $userid . '/log_out', [] );
+		return $this->_postRequest( '/admin/users/' . $userId . '/log_out', [] );
 	}
-
 
 	/** @noinspection MoreThanThreeArgumentsInspection */
 	/**
