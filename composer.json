@@ -2,7 +2,7 @@
     "name": "pnoeric/discourse-api-php",
     "description": "Packed version of the Discourse API PHP library from discoursehosting.",
     "license": "GPL-2.0-or-later",
-    "version": "1.0.0",
+    "version": "1.3.0",
     "keywords": ["discourse"],
     "authors": [
         {
