@@ -6,7 +6,18 @@ https://github.com/discoursehosting/discourse-api-php
 Some changes may be added from the forks of that original source. Sorry, not done with proper merging..
 
 Also some changes from 
+
+```
 https://github.com/sspssp/discourse-api-php
 https://github.com/kazad/discourse-api-php
 https://github.com/timolaine/discourse-api-php
+```
+
+
+
+## March 2020
+
+I'm fixing it up and making improvements. - https://github.com/pnoeric/
+
+
 
