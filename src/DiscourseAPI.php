@@ -299,19 +299,48 @@ class DiscourseAPI {
 	//////////////   USERS
 
 	/**
-	 * log out user
+	 * log out user - by username
+	 *
+	 * @param string $userName username of new user
+	 *
+	 * @return mixed HTTP return code and API return object
+	 *
+	 * @deprecated please use logoutUserByUsername() instead
+	 *
+	 */
+	public function logoutUser( string $userName ) {
+		return $this->logoutUserByUsername( $userName );
+	}
+
+	/**
+	 * log out user - by username
+	 *
+	 * @param string $userName username of new user
+	 *
+	 * @return mixed HTTP return code and API return object
+	 */
+	public function logoutUserByUsername( string $userName ) {
+		$userid = $this->getUserByUsername( $userName )->apiresult->user->id;
+
+		return $this->logoutUserById( $userid );
+	}
+
+	/**
+	 * log out user - by user ID
 	 *
 	 * @param string $userId
 	 *
 	 * @return mixed HTTP return code and API return object
 	 */
-	public function logoutUser( string $userId ) {
+	public function logoutUserById( int $userId ) {
+
 		if ( ! \is_int( $userId ) ) {
 			return false;
 		}
 
 		return $this->_postRequest( '/admin/users/' . $userId . '/log_out', [] );
 	}
+
 
 	/** @noinspection MoreThanThreeArgumentsInspection */
 	/**
