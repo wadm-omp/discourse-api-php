@@ -1,23 +1,15 @@
 # discourse-api-php
 
-This is a composer packaged version of the PHP library for accessing the Discourse API as published by DiscourseHosting 
-https://github.com/discoursehosting/discourse-api-php
+This is a composer packaged version of the PHP library for accessing the Discourse API as published by DiscourseHosting at https://github.com/discoursehosting/discourse-api-php
 
-Some changes may be added from the forks of that original source. Sorry, not done with proper merging..
+## Includes contributions from:
 
-Also some changes from 
-
-```
-https://github.com/sspssp/discourse-api-php
-https://github.com/kazad/discourse-api-php
-https://github.com/timolaine/discourse-api-php
-```
+* https://github.com/kazad/discourse-api-php
+* https://github.com/timolaine/discourse-api-php
+* Me, pnoeric
 
 
+### May 2020 - pnoeric
 
-## March 2020
-
-I'm fixing it up and making improvements. - https://github.com/pnoeric/
-
-
+Hi, I'm pnoeric (https://github.com/pnoeric/) and I'm working on getting this library organized and merged.
 

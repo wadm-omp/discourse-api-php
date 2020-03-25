@@ -47,15 +47,22 @@ class DiscourseAPI {
 	}
 
 	/**
+	 * @deprecated please use joinGroup() instead
+	 */
+	public function addUserToGroup( $g, $u ) {
+		return $this->joinGroup( $g, $u );
+	}
+
+	/**
 	 * joinGroup
 	 *
-	 * @param string $groupname name of group
+	 * @param string $groupName name of group
 	 * @param string $username user to add to the group
 	 *
 	 * @return mixed HTTP return code and API return object
 	 */
-	public function joinGroup( $groupname, $username ) {
-		$groupId = $this->getGroupIdByGroupName( $groupname );
+	public function joinGroup( $groupName, $username ) {
+		$groupId = $this->getGroupIdByGroupName( $groupName );
 		if ( ! $groupId ) {
 			return false;
 		}
@@ -84,14 +91,14 @@ class DiscourseAPI {
 	}
 
 	/**
-	 * @param $groupname
+	 * @param $groupName
 	 * @param $username
 	 *
 	 * @return bool|\stdClass
 	 */
-	public function leaveGroup( $groupname, $username ) {
+	public function leaveGroup( $groupName, $username ) {
 		$userid  = $this->getUserByUsername( $username )->apiresult->user->id;
-		$groupId = $this->getGroupIdByGroupName( $groupname );
+		$groupId = $this->getGroupIdByGroupName( $groupName );
 		if ( ! $groupId ) {
 			return false;
 		}
@@ -115,7 +122,7 @@ class DiscourseAPI {
 
 	/** @noinspection MoreThanThreeArgumentsInspection */
 	/**
-	 * group
+	 * create a group and add users
 	 *
 	 * @param string $groupname name of group to be created
 	 * @param array $usernames users in the group
@@ -143,6 +150,8 @@ class DiscourseAPI {
 		$trustlevel = '0'
 	) {
 		$groupId = $this->getGroupIdByGroupName( $groupname );
+
+		// if group already exists, get outta here
 		if ( $groupId ) {
 			return false;
 		}
@@ -392,7 +401,7 @@ class DiscourseAPI {
 	public function getUsernameByEmail( $email ) {
 		$users = $this->_getRequest( '/admin/users/list/active.json?filter=' . urlencode( $email ) );
 		foreach ( $users->apiresult as $user ) {
-			if ( $user->email === $email ) {
+			if ( strtolower( $user->email ) === strtolower( $email ) ) {
 				return $user->username;
 			}
 		}
@@ -618,17 +627,22 @@ class DiscourseAPI {
 		$paramArray['api_key']      = $this->_apiKey;
 		$paramArray['api_username'] = $apiUser;
 		$paramArray['show_emails']  = 'true';
-		$ch                         = curl_init();
-		$url                        = sprintf( '%s://%s%s?%s', $this->_protocol, $this->_dcHostname, $reqString, http_build_query( $paramArray ) );
+
+		$ch  = curl_init();
+		$url = sprintf( '%s://%s%s?%s', $this->_protocol, $this->_dcHostname, $reqString, http_build_query( $paramArray ) );
+
 		curl_setopt( $ch, CURLOPT_URL, $url );
 		curl_setopt( $ch, CURLOPT_CUSTOMREQUEST, $HTTPMETHOD );
 		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
 		curl_setopt( $ch, CURLOPT_FOLLOWLOCATION, true );
+
 		$body = curl_exec( $ch );
 		$rc   = curl_getinfo( $ch, CURLINFO_HTTP_CODE );
 		curl_close( $ch );
+
 		$resObj            = new \stdClass();
 		$resObj->http_code = $rc;
+
 		// Only return valid json
 		$json              = json_decode( $body );
 		$resObj->apiresult = $body;
@@ -727,5 +741,4 @@ class DiscourseAPI {
 		$this->_apiKey     = $apiKey;
 		$this->_protocol   = $protocol;
 	}
-
 }
