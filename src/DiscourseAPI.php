@@ -211,12 +211,14 @@ class DiscourseAPI {
 	}
 
 	/**
-	 * @param $categoryName
+	 * get info on a category - by name or ID
+	 *
+	 * @param $categoryNameOrId
 	 *
 	 * @return \stdClass
 	 */
-	public function getCategory( $categoryName ): \stdClass {
-		return $this->_getRequest( "/c/{$categoryName}.json" );
+	public function getCategory( $categoryNameOrId ): \stdClass {
+		return $this->_getRequest( "/c/{$categoryNameOrId}.json" );
 	}
 
 	/** @noinspection MoreThanThreeArgumentsInspection * */
@@ -561,14 +563,14 @@ class DiscourseAPI {
 	}
 
 	/**
-	 * getTopic
+	 * get info on a topic - by name or ID
 	 *
-	 * @param $topicId
+	 * @param $topicNameOrId
 	 *
 	 * @return \stdClass
 	 */
-	public function getTopic( $topicId ): \stdClass {
-		return $this->_getRequest( "/t/{$topicId}.json" );
+	public function getTopic( $topicNameOrId ): \stdClass {
+		return $this->_getRequest( "/t/{$topicNameOrId}.json" );
 	}
 
 	/**
