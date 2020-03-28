@@ -19,9 +19,20 @@
 namespace pnoeric\discourseAPI;
 
 class DiscourseAPI {
+	/**
+	 * @var string
+	 */
 	private $_protocol;
+
+	/**
+	 * @var string
+	 */
 	private $_apiKey;
-	private $_dcHostname;
+
+	/**
+	 * @var string
+	 */
+	private $_discourseHostname;
 
 	////////////////  Groups
 
@@ -316,7 +327,7 @@ class DiscourseAPI {
 	 *
 	 * @return mixed HTTP return code and API return object
 	 *
-	 * @deprecated please use logoutUserByUsername() instead
+	 * @deprecated please use logoutUserByUsername() or logoutUserById() instead
 	 *
 	 */
 	public function logoutUser( string $userName ) {
@@ -631,7 +642,7 @@ class DiscourseAPI {
 		$paramArray['show_emails']  = 'true';
 
 		$ch  = curl_init();
-		$url = sprintf( '%s://%s%s?%s', $this->_protocol, $this->_dcHostname, $reqString, http_build_query( $paramArray ) );
+		$url = sprintf( '%s://%s%s?%s', $this->_protocol, $this->_discourseHostname, $reqString, http_build_query( $paramArray ) );
 
 		curl_setopt( $ch, CURLOPT_URL, $url );
 		curl_setopt( $ch, CURLOPT_CUSTOMREQUEST, $HTTPMETHOD );
@@ -665,9 +676,14 @@ class DiscourseAPI {
 	 * @return \stdClass
 	 **/
 	private function _putpostRequest( string $reqString, array $paramArray, string $apiUser = 'system', $HTTPMETHOD = 'POST' ): \stdClass {
-		$ch  = curl_init();
-		$url = sprintf( '%s://%s%s?api_key=%s&api_username=%s', $this->_protocol, $this->_dcHostname, $reqString, $this->_apiKey, $apiUser );
-		curl_setopt( $ch, CURLOPT_URL, $url );
+
+		// set up headers for HTTP request we're about to make
+		$headers   = [ 'Content-Type: multipart/x-www-form-url-encoded' ];
+		$headers[] = 'Api-Key: ' . $this->_apiKey;
+		$headers[] = 'Api-Username: ' . $apiUser;
+
+		// prepare query body in x-www-form-url-encoded format
+		// see https://stackoverflow.com/questions/4007969/application-x-www-form-urlencoded-or-multipart-form-data
 		$query = '';
 		if ( isset( $paramArray['group'] ) && is_array( $paramArray['group'] ) ) {
 			$query = http_build_query( $paramArray );
@@ -679,12 +695,21 @@ class DiscourseAPI {
 			}
 		}
 		$query = trim( $query, '&' );
+
+		// fire up curl and send request
+		$ch  = curl_init();
+		$url = sprintf( '%s://%s%s', $this->_protocol, $this->_discourseHostname, $reqString ); //, $this->_apiKey, $apiUser );
+		curl_setopt( $ch, CURLOPT_URL, $url );
+		curl_setopt( $ch, CURLOPT_HTTPHEADER, $headers );
 		curl_setopt( $ch, CURLOPT_POSTFIELDS, $query );
 		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
 		curl_setopt( $ch, CURLOPT_CUSTOMREQUEST, $HTTPMETHOD );
+
+		// make the call and get the results
 		$body = curl_exec( $ch );
 		$rc   = curl_getinfo( $ch, CURLINFO_HTTP_CODE );
 		curl_close( $ch );
+
 		$resObj            = new \stdClass();
 		$json              = json_decode( $body );
 		$resObj->apiresult = $body;
@@ -734,13 +759,13 @@ class DiscourseAPI {
 	/**
 	 * DiscourseAPI constructor.
 	 *
-	 * @param        $dcHostname
+	 * @param string $discourseHostname
 	 * @param null $apiKey
 	 * @param string $protocol
 	 */
-	public function __construct( $dcHostname, $apiKey = null, $protocol = 'http' ) {
-		$this->_dcHostname = $dcHostname;
-		$this->_apiKey     = $apiKey;
-		$this->_protocol   = $protocol;
+	public function __construct( $discourseHostname, $apiKey = null, $protocol = 'https' ) {
+		$this->_discourseHostname = $discourseHostname;
+		$this->_apiKey            = $apiKey;
+		$this->_protocol          = $protocol;
 	}
 }
