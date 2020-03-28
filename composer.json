@@ -1,6 +1,6 @@
 {
   "name"       : "pnoeric/discourse-api-php",
-  "description": "Packed version of the Discourse API PHP library from discoursehosting.",
+  "description": "Discourse API library for PHP (based the library from discoursehosting)",
   "license"    : "GPL-2.0-or-later",
   "keywords"   : [
     "discourse"
@@ -9,11 +9,20 @@
     {
       "name" : "richp10",
       "email": "richp10@gmail.com"
+    },
+    {
+      "name"    : "pnoeric",
+      "email"   : "eric@ericmueller.org",
+      "homepage": "https://github.com/pnoeric/discourse-api-php"
     }
   ],
   "require"    : {
     "ext-curl": "*",
     "ext-json": "*"
+  },
+  "require-dev": {
+    "phpunit/phpunit" : "^7",
+    "vlucas/phpdotenv": "^4.1"
   },
   "autoload"   : {
     "classmap": [
