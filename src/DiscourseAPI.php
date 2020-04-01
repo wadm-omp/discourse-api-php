@@ -627,18 +627,17 @@ class DiscourseAPI {
 
 	/**
 	 * updateUser()
+	 * aka setUserInfo()
 	 *
 	 *
-	 * @param        $bodyhtml
-	 * @param        $post_id
-	 * @param string $userName
+	 * @param string $userName  note this can not be a discourse user ID
+	 * @param        $params    params to set
 	 *
 	 * @return stdClass
 	 * @throws Exception
 	 */
-	public function updateUser( $userNameOrDiscourseUserId, $params ): stdClass {
-
-		return $this->_putRequest( '/u/' . $userNameOrDiscourseUserId . '.json', [ $params ], $userNameOrDiscourseUserId );
+	public function updateUser( $userName, array $params ): stdClass {
+		return $this->_putRequest( '/u/' . $userName . '.json', [ $params ], $userName );
 	}
 
 	//////////////  TOPICS
