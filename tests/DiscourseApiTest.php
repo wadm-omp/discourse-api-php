@@ -160,17 +160,28 @@ class DiscourseApiTest extends TestCase {
 		// pull out the first category
 		$firstCategory = $res->apiresult->category_list->categories[0];
 
-		$topicName = "Here is my test topic that has a long title and random number, " . mt_rand( 1, 999 );
+		$topicName = "Here's a test topic (with a long title!) with a random number: " . mt_rand( 10, 9999 );
 
 		$bodyText  = $this->getDummyPargraphs( 3 );
 		$bodyText2 = $this->getDummyPargraphs( 3 );
 
-		$topicResult = $this->DiscourseAPI->createTopic( $topicName, $bodyText, $firstCategory->id, 'system' );
+		$dt = new \DateTime();
+		$dt->setTimestamp( 1571020500 );        // 14 oct 2019, 4:35:00 am local time [zurich]
+
+		$topicResult = $this->DiscourseAPI->createTopic( $topicName, $bodyText,
+		                                                 $firstCategory->id, 'system',
+		                                                 0, $dt );
 
 		$this->assertIsInt( $topicResult->apiresult->topic_id );
-		$this->assertNotEquals( 0, $topicResult->apiresult->id, 'Topic ID of new topic is 0' );
+		$this->assertNotEquals( 0, $topicResult->apiresult->topic_id, 'Topic ID of new topic is 0' );
 
-		$res = $this->DiscourseAPI->createPost( $bodyText2, $topicResult->apiresult->topic_id, 'system' );
+		$dt->setTimestamp( 1571307742 );        // 17 oct 2019, 12:22:22 pm local time [zurich]
+
+		$res = $this->DiscourseAPI->createPost( $bodyText2, $topicResult->apiresult->topic_id, 'system', $dt );
+
+
+		var_dump( $res );
+
 	}
 
 
