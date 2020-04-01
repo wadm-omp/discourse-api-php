@@ -366,17 +366,17 @@ class DiscourseAPI {
 	 * :name, :title, :bio_raw, :location, :website, :profile_background, :card_background,
 	 * :email_messages_level, :mailing_list_mode, :homepage_id, :theme_ids, :user_fields
 	 *
-	 * @param string $userName username of new user
+	 * @param string $userName note this can not be a discourse user ID
+	 * @param array  $params   params to set
 	 *
-	 * @param array  $params
+	 * @return stdClass HTTP return code and API return object
 	 *
-	 * @return mixed HTTP return code and API return object
 	 * @throws Exception
 	 */
-	public function setUserInfo( string $userName, $params ) {
-		return $this->_postRequest( '/u/' . $userName . '.json', [ $params ] );
-
+	public function setUserInfo( $userName, array $params ): stdClass {
+		return $this->_putRequest( '/u/' . $userName . '.json', [ $params ], $userName );
 	}
+
 
 	/**
 	 * log out user - by username
@@ -623,21 +623,6 @@ class DiscourseAPI {
 		];
 
 		return $this->_putRequest( '/posts/' . $post_id, [ $params ], $userName );
-	}
-
-	/**
-	 * updateUser()
-	 * aka setUserInfo()
-	 *
-	 *
-	 * @param string $userName  note this can not be a discourse user ID
-	 * @param        $params    params to set
-	 *
-	 * @return stdClass
-	 * @throws Exception
-	 */
-	public function updateUser( $userName, array $params ): stdClass {
-		return $this->_putRequest( '/u/' . $userName . '.json', [ $params ], $userName );
 	}
 
 	//////////////  TOPICS

@@ -219,7 +219,7 @@ class DiscourseApiTest extends TestCase {
 		$this->assertGreaterThan( 0, $res->apiresult->user_id, 'User ID is 0' );
 		$this->assertEquals( true, $res->apiresult->success, 'createUser did not return success' );
 
-		$r = $this->DiscourseAPI->updateUser( $userName, [ 'location' => 'At home right now' ] );
+		$r = $this->DiscourseAPI->setUserInfo( $userName, [ 'location' => 'At home right now' ] );
 		var_dump( $r );
 	}
 
