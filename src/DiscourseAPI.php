@@ -18,6 +18,7 @@
 
 namespace pnoeric\discourseAPI;
 
+use DateTime;
 use Exception;
 use stdClass;
 use function is_int;
@@ -574,15 +575,15 @@ class DiscourseAPI {
 	/**
 	 * createPost
 	 *
-	 * @param string    $bodyText
-	 * @param int       $topicId
-	 * @param string    $userName
-	 * @param \DateTime $createDateTime create date/time for the post
+	 * @param string   $bodyText
+	 * @param int      $topicId
+	 * @param string   $userName
+	 * @param DateTime $createDateTime create date/time for the post
 	 *
 	 * @return stdClass
 	 * @throws Exception
 	 */
-	public function createPost( string $bodyText, int $topicId, string $userName, \DateTime $createDateTime ): stdClass {
+	public function createPost( string $bodyText, int $topicId, string $userName, DateTime $createDateTime ): stdClass {
 		$params = [
 			'raw'       => $bodyText,
 			'archetype' => 'regular',
@@ -638,11 +639,12 @@ class DiscourseAPI {
 	 *
 	 * this creates a new topic, then makes the first post in the topic, from the $userName with the $bodyText
 	 *
-	 * @param string $topicTitle title of topic
-	 * @param string $bodyText   body text of topic post
-	 * @param string $categoryId must be Discourse category ID, can't be slug!
-	 * @param string $userName   user to create topic as
-	 * @param int    $replyToId  optional: post id to reply as
+	 * @param string        $topicTitle     title of topic
+	 * @param string        $bodyText       body text of topic post
+	 * @param string        $categoryId     must be Discourse category ID, can't be slug!
+	 * @param string        $userName       user to create topic as
+	 * @param int           $replyToId      optional: post id to reply as
+	 * @param DateTime|null $createDateTime create datetime for topic
 	 *
 	 * @return mixed HTTP return code and API return object
 	 *
@@ -654,7 +656,8 @@ class DiscourseAPI {
 		string $bodyText,
 		string $categoryId,
 		string $userName,
-		int $replyToId = 0
+		int $replyToId = 0,
+		DateTime $createDateTime = null
 	) {
 
 		if ( ! $categoryId ) {
@@ -668,6 +671,11 @@ class DiscourseAPI {
 			'archetype'            => 'regular',        // not a private_message
 			'reply_to_post_number' => $replyToId,
 		];
+
+		if ( $createDateTime ) {
+			// Discourse likes ISO 8601 date/time format
+			$params ['created_at'] = $createDateTime->format( 'c' );
+		}
 
 		// https://docs.discourse.org/#tag/Topics/paths/~1posts.json/post
 		return $this->_postRequest( '/posts', [ $params ], $userName );
