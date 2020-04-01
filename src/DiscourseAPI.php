@@ -334,6 +334,25 @@ class DiscourseAPI {
 		return $this->logoutUserByUsername( $userName );
 	}
 
+
+	/**
+	 * set user's info
+	 * see https://github.com/discourse/discourse_api/blob/master/lib/discourse_api/api/users.rb#L32
+	 *
+	 * :name, :title, :bio_raw, :location, :website, :profile_background, :card_background,
+	 * :email_messages_level, :mailing_list_mode, :homepage_id, :theme_ids, :user_fields
+	 *
+	 * @param string $userName username of new user
+	 *
+	 * @param array $params
+	 *
+	 * @return mixed HTTP return code and API return object
+	 */
+	public function setUserInfo( string $userName, $params ) {
+		return $this->_postRequest( '/u/' . $userName . '.json', [ $params ] );
+
+	}
+
 	/**
 	 * log out user - by username
 	 *
@@ -342,25 +361,25 @@ class DiscourseAPI {
 	 * @return mixed HTTP return code and API return object
 	 */
 	public function logoutUserByUsername( string $userName ) {
-		$userid = $this->getUserByUsername( $userName )->apiresult->user->id;
+		$discourseUserId = $this->getUserByUsername( $userName )->apiresult->user->id;
 
-		return $this->logoutUserById( $userid );
+		return $this->logoutUserByDiscourseId( $discourseUserId );
 	}
 
 	/**
 	 * log out user - by user ID
 	 *
-	 * @param string $userId
+	 * @param string $discourseUserId
 	 *
 	 * @return mixed HTTP return code and API return object
 	 */
-	public function logoutUserById( int $userId ) {
+	public function logoutUserById( int $discourseUserId ) {
 
-		if ( ! \is_int( $userId ) ) {
+		if ( ! \is_int( $discourseUserId ) ) {
 			return false;
 		}
 
-		return $this->_postRequest( '/admin/users/' . $userId . '/log_out', [] );
+		return $this->_postRequest( '/admin/users/' . $discourseUserId . '/log_out', [] );
 	}
 
 
@@ -376,6 +395,8 @@ class DiscourseAPI {
 	 * @return mixed HTTP return code and API return object
 	 */
 	public function createUser( string $name, string $userName, string $emailAddress, string $password ) {
+
+		// apparently we need to call hp.json to get a challenge string, not sure where/why, can't find in Discourse docs
 		$obj = $this->_getRequest( '/users/hp.json' );
 		if ( $obj->http_code !== 200 ) {
 			return false;
@@ -396,12 +417,12 @@ class DiscourseAPI {
 	/**
 	 * activateUser
 	 *
-	 * @param integer $userId id of user to activate
+	 * @param integer $discourseUserId id of user to activate
 	 *
 	 * @return mixed HTTP return code
 	 */
-	public function activateUser( $userId ) {
-		return $this->_putRequest( "/admin/users/{$userId}/activate", [] );
+	public function activateUser( $discourseUserId ) {
+		return $this->_putRequest( "/admin/users/{$discourseUserId}/activate", [] );
 	}
 
 	/**
@@ -445,6 +466,25 @@ class DiscourseAPI {
 	}
 
 	/**
+	 * getUserByExternalID
+	 *
+	 * @param string $externalID external id of sso user
+	 *
+	 * @return mixed HTTP return code and API return object
+	 */
+	public function getDiscourseUserIdFromExternalId( $externalID ) {
+		$res = $this->_getRequest( "/users/by-external/{$externalID}.json" );
+
+		if ( $res && is_object( $res ) ) {
+			return $res->apiresult->user->id;
+		}
+
+		return false;
+	}
+
+	/**
+	 * invite a user to a topic
+	 *
 	 * @param        $email
 	 * @param        $topicId
 	 * @param string $userName
@@ -678,9 +718,11 @@ class DiscourseAPI {
 	private function _putpostRequest( string $reqString, array $paramArray, string $apiUser = 'system', $HTTPMETHOD = 'POST' ): \stdClass {
 
 		// set up headers for HTTP request we're about to make
-		$headers   = [ 'Content-Type: multipart/x-www-form-url-encoded' ];
-		$headers[] = 'Api-Key: ' . $this->_apiKey;
-		$headers[] = 'Api-Username: ' . $apiUser;
+		$headers = [
+			'Content-Type: multipart/x-www-form-url-encoded',
+			'Api-Key: ' . $this->_apiKey,
+			'Api-Username: ' . $apiUser,
+		];
 
 		// prepare query body in x-www-form-url-encoded format
 		// see https://stackoverflow.com/questions/4007969/application-x-www-form-urlencoded-or-multipart-form-data
@@ -699,6 +741,7 @@ class DiscourseAPI {
 		// fire up curl and send request
 		$ch  = curl_init();
 		$url = sprintf( '%s://%s%s', $this->_protocol, $this->_discourseHostname, $reqString ); //, $this->_apiKey, $apiUser );
+
 		curl_setopt( $ch, CURLOPT_URL, $url );
 		curl_setopt( $ch, CURLOPT_HTTPHEADER, $headers );
 		curl_setopt( $ch, CURLOPT_POSTFIELDS, $query );
