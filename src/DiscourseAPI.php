@@ -574,19 +574,25 @@ class DiscourseAPI {
 	/**
 	 * createPost
 	 *
-	 * @param $bodyText
-	 * @param $topicId
-	 * @param $userName
+	 * @param string    $bodyText
+	 * @param int       $topicId
+	 * @param string    $userName
+	 * @param \DateTime $createDateTime create date/time for the post
 	 *
 	 * @return stdClass
 	 * @throws Exception
 	 */
-	public function createPost( string $bodyText, int $topicId, string $userName ): stdClass {
+	public function createPost( string $bodyText, int $topicId, string $userName, \DateTime $createDateTime ): stdClass {
 		$params = [
 			'raw'       => $bodyText,
 			'archetype' => 'regular',
 			'topic_id'  => $topicId,
 		];
+
+		if ( $createDateTime ) {
+			// Discourse likes ISO 8601 date/time format
+			$params ['created_at'] = $createDateTime->format( 'c' );
+		}
 
 		return $this->_postRequest( '/posts', [ $params ], $userName );
 	}
