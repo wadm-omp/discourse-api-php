@@ -39,7 +39,7 @@ class DiscourseAPI {
 	private $_discourseHostname;
 
 	private $debugGetRequest = false;
-	private $debugPutPostRequest = true;
+	private $debugPutPostRequest = false;
 
 	////////////////  Groups
 
