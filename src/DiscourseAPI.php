@@ -18,6 +18,10 @@
 
 namespace pnoeric\discourseAPI;
 
+use Exception;
+use stdClass;
+use function is_int;
+
 class DiscourseAPI {
 	/**
 	 * @var string
@@ -33,6 +37,9 @@ class DiscourseAPI {
 	 * @var string
 	 */
 	private $_discourseHostname;
+
+	private $debugGetRequest = false;
+	private $debugPutPostRequest = true;
 
 	////////////////  Groups
 
@@ -51,6 +58,7 @@ class DiscourseAPI {
 	 * @param string $group name of group
 	 *
 	 * @return mixed HTTP return code and API return object
+	 * @throws Exception
 	 */
 
 	public function getGroup( $groupname ) {
@@ -68,9 +76,10 @@ class DiscourseAPI {
 	 * joinGroup
 	 *
 	 * @param string $groupName name of group
-	 * @param string $username user to add to the group
+	 * @param string $username  user to add to the group
 	 *
 	 * @return mixed HTTP return code and API return object
+	 * @throws Exception
 	 */
 	public function joinGroup( $groupName, $username ) {
 		$groupId = $this->getGroupIdByGroupName( $groupName );
@@ -105,7 +114,8 @@ class DiscourseAPI {
 	 * @param $groupName
 	 * @param $username
 	 *
-	 * @return bool|\stdClass
+	 * @return bool|stdClass
+	 * @throws Exception
 	 */
 	public function leaveGroup( $groupName, $username ) {
 		$userid  = $this->getUserByUsername( $username )->apiresult->user->id;
@@ -126,19 +136,19 @@ class DiscourseAPI {
 	 * @param string $group name of group
 	 *
 	 * @return mixed HTTP return code and API return object
+	 * @throws Exception
 	 */
 	public function getGroupMembers( $group ) {
 		return $this->_getRequest( "/groups/{$group}/members.json" );
 	}
 
-	/** @noinspection MoreThanThreeArgumentsInspection */
 	/**
 	 * create a group and add users
 	 *
 	 * @param string $groupname name of group to be created
-	 * @param array $usernames users in the group
+	 * @param array  $usernames users in the group
 	 *
-	 * @param int $aliaslevel
+	 * @param int    $aliaslevel
 	 * @param string $visible
 	 * @param string $automemdomain
 	 * @param string $automemretro
@@ -148,7 +158,9 @@ class DiscourseAPI {
 	 *
 	 * @return mixed HTTP return code and API return object
 	 * @noinspection MoreThanThreeArgumentsInspection
-	 **/
+	 *
+	 * @throws Exception
+	 */
 	public function addGroup(
 		$groupname,
 		array $usernames = [],
@@ -187,7 +199,8 @@ class DiscourseAPI {
 	/**
 	 * @param string $groupname
 	 *
-	 * @return bool|\stdClass
+	 * @return bool|stdClass
+	 * @throws Exception
 	 */
 	public function removeGroup( string $groupname ) {
 		$groupId = $this->getGroupIdByGroupName( $groupname );
@@ -205,12 +218,14 @@ class DiscourseAPI {
 	 * createCategory
 	 *
 	 * @param string $categoryName name of new category
-	 * @param string $color color code of new category (six hex chars, no #)
-	 * @param string $textColor optional color code of text for new category
-	 * @param string $userName optional user to create category as
+	 * @param string $color        color code of new category (six hex chars, no #)
+	 * @param string $textColor    optional color code of text for new category
+	 * @param string $userName     optional user to create category as
 	 *
 	 * @return mixed HTTP return code and API return object
-	 **/
+	 *
+	 * @throws Exception
+	 */
 	public function createCategory(
 		string $categoryName,
 		string $color,
@@ -231,9 +246,10 @@ class DiscourseAPI {
 	 *
 	 * @param $categoryIdOrSlug
 	 *
-	 * @return \stdClass
+	 * @return stdClass
+	 * @throws Exception
 	 */
-	public function getCategory( $categoryIdOrSlug ): \stdClass {
+	public function getCategory( $categoryIdOrSlug ): stdClass {
 		return $this->_getRequest( "/c/{$categoryIdOrSlug}.json" );
 	}
 
@@ -241,27 +257,28 @@ class DiscourseAPI {
 	/**
 	 * Edit Category
 	 *
-	 * @param integer $catid
-	 * @param string $allow_badges
-	 * @param string $auto_close_based_on_last_post
-	 * @param string $auto_close_hours
-	 * @param string $background_url
-	 * @param string $color
-	 * @param string $contains_messages
-	 * @param string $email_in
-	 * @param string $email_in_allow_strangers
-	 * @param string $logo_url
-	 * @param string $name
+	 * @param integer    $catid
+	 * @param string     $allow_badges
+	 * @param string     $auto_close_based_on_last_post
+	 * @param string     $auto_close_hours
+	 * @param string     $background_url
+	 * @param string     $color
+	 * @param string     $contains_messages
+	 * @param string     $email_in
+	 * @param string     $email_in_allow_strangers
+	 * @param string     $logo_url
+	 * @param string     $name
 	 * @param int|string $parent_category_id
 	 * @param            $groupname
 	 * @param int|string $position
-	 * @param string $slug
-	 * @param string $suppress_from_homepage
-	 * @param string $text_color
-	 * @param string $topic_template
-	 * @param array $permissions
+	 * @param string     $slug
+	 * @param string     $suppress_from_homepage
+	 * @param string     $text_color
+	 * @param string     $topic_template
+	 * @param array      $permissions
 	 *
 	 * @return mixed HTTP return code and API return object
+	 * @throws Exception
 	 */
 	public function updatecat(
 		$catid,
@@ -318,6 +335,7 @@ class DiscourseAPI {
 	 * getCategories
 	 *
 	 * @return mixed HTTP return code and API return object
+	 * @throws Exception
 	 */
 	public function getCategories() {
 		return $this->_getRequest( '/categories.json' );
@@ -332,6 +350,7 @@ class DiscourseAPI {
 	 *
 	 * @return mixed HTTP return code and API return object
 	 *
+	 * @throws Exception
 	 * @deprecated please use logoutUserByUsername() or logoutUserById() instead
 	 *
 	 */
@@ -349,9 +368,10 @@ class DiscourseAPI {
 	 *
 	 * @param string $userName username of new user
 	 *
-	 * @param array $params
+	 * @param array  $params
 	 *
 	 * @return mixed HTTP return code and API return object
+	 * @throws Exception
 	 */
 	public function setUserInfo( string $userName, $params ) {
 		return $this->_postRequest( '/u/' . $userName . '.json', [ $params ] );
@@ -364,11 +384,12 @@ class DiscourseAPI {
 	 * @param string $userName username of new user
 	 *
 	 * @return mixed HTTP return code and API return object
+	 * @throws Exception
 	 */
 	public function logoutUserByUsername( string $userName ) {
 		$discourseUserId = $this->getUserByUsername( $userName )->apiresult->user->id;
 
-		return $this->logoutUserByDiscourseId( $discourseUserId );
+		return $this->logoutUserById( $discourseUserId );
 	}
 
 	/**
@@ -377,10 +398,11 @@ class DiscourseAPI {
 	 * @param string $discourseUserId
 	 *
 	 * @return mixed HTTP return code and API return object
+	 * @throws Exception
 	 */
 	public function logoutUserById( int $discourseUserId ) {
 
-		if ( ! \is_int( $discourseUserId ) ) {
+		if ( ! is_int( $discourseUserId ) ) {
 			return false;
 		}
 
@@ -392,14 +414,16 @@ class DiscourseAPI {
 	/**
 	 * createUser
 	 *
-	 * @param string $name name of new user
-	 * @param string $userName username of new user
+	 * @param string $name         name of new user
+	 * @param string $userName     username of new user
 	 * @param string $emailAddress email address of new user
-	 * @param string $password password of new user
+	 * @param string $password     password of new user
+	 * @param bool   $activate     activate user immediately (no confirmation email)?
 	 *
 	 * @return mixed HTTP return code and API return object
+	 * @throws Exception
 	 */
-	public function createUser( string $name, string $userName, string $emailAddress, string $password ) {
+	public function createUser( string $name, string $userName, string $emailAddress, string $password, bool $activate = true ) {
 
 		// apparently we need to call hp.json to get a challenge string, not sure where/why, can't find in Discourse docs
 		$obj = $this->_getRequest( '/users/hp.json' );
@@ -414,6 +438,7 @@ class DiscourseAPI {
 			'password'              => $password,
 			'challenge'             => strrev( $obj->apiresult->challenge ),
 			'password_confirmation' => $obj->apiresult->value,
+			'active'                => $activate ? 'true' : 'false',
 		];
 
 		return $this->_postRequest( '/users', [ $params ] );
@@ -425,6 +450,7 @@ class DiscourseAPI {
 	 * @param integer $discourseUserId id of user to activate
 	 *
 	 * @return mixed HTTP return code
+	 * @throws Exception
 	 */
 	public function activateUser( $discourseUserId ) {
 		return $this->_putRequest( "/admin/users/{$discourseUserId}/activate", [] );
@@ -436,6 +462,7 @@ class DiscourseAPI {
 	 * @param string $email email of user
 	 *
 	 * @return mixed HTTP return code and API return object
+	 * @throws Exception
 	 */
 	public function getUsernameByEmail( $email ) {
 		$users = $this->_getRequest( '/admin/users/list/active.json?filter=' . urlencode( $email ) );
@@ -454,6 +481,7 @@ class DiscourseAPI {
 	 * @param string $userName username of user
 	 *
 	 * @return mixed HTTP return code and API return object
+	 * @throws Exception
 	 */
 	public function getUserByUsername( $userName ) {
 		return $this->_getRequest( "/users/{$userName}.json" );
@@ -465,6 +493,7 @@ class DiscourseAPI {
 	 * @param string $externalID external id of sso user
 	 *
 	 * @return mixed HTTP return code and API return object
+	 * @throws Exception
 	 */
 	function getUserByExternalID( $externalID ) {
 		return $this->_getRequest( "/users/by-external/{$externalID}.json" );
@@ -476,6 +505,7 @@ class DiscourseAPI {
 	 * @param string $externalID external id of sso user
 	 *
 	 * @return mixed HTTP return code and API return object
+	 * @throws Exception
 	 */
 	public function getDiscourseUserIdFromExternalId( $externalID ) {
 		$res = $this->_getRequest( "/users/by-external/{$externalID}.json" );
@@ -494,9 +524,10 @@ class DiscourseAPI {
 	 * @param        $topicId
 	 * @param string $userName
 	 *
-	 * @return \stdClass
+	 * @return stdClass
+	 * @throws Exception
 	 */
-	public function inviteUser( $email, $topicId, $userName = 'system' ): \stdClass {
+	public function inviteUser( $email, $topicId, $userName = 'system' ): stdClass {
 		$params = [
 			'email'    => $email,
 			'topic_id' => $topicId,
@@ -511,6 +542,7 @@ class DiscourseAPI {
 	 * @param string $email email of user
 	 *
 	 * @return mixed user object
+	 * @throws Exception
 	 */
 	public function getUserByEmail( $email ) {
 		$users = $this->_getRequest( '/admin/users/list/active.json', [
@@ -531,6 +563,7 @@ class DiscourseAPI {
 	 * @param string $userName username of user
 	 *
 	 * @return mixed HTTP return code and list of badges for given user
+	 * @throws Exception
 	 */
 	public function getUserBadgesByUsername( $userName ) {
 		return $this->_getRequest( "/user-badges/{$userName}.json" );
@@ -541,15 +574,14 @@ class DiscourseAPI {
 	/**
 	 * createPost
 	 *
-	 * NOT WORKING YET
-	 *
 	 * @param $bodyText
 	 * @param $topicId
 	 * @param $userName
 	 *
-	 * @return \stdClass
+	 * @return stdClass
+	 * @throws Exception
 	 */
-	public function createPost( string $bodyText, $topicId, string $userName ): \stdClass {
+	public function createPost( string $bodyText, int $topicId, string $userName ): stdClass {
 		$params = [
 			'raw'       => $bodyText,
 			'archetype' => 'regular',
@@ -566,6 +598,7 @@ class DiscourseAPI {
 	 * @param $post_number
 	 *
 	 * @return mixed HTTP return code and API return object
+	 * @throws Exception
 	 */
 	public function getPostsByNumber( $topic_id, $post_number ) {
 		return $this->_getRequest( '/posts/by_number/' . $topic_id . '/' . $post_number . '.json' );
@@ -578,9 +611,10 @@ class DiscourseAPI {
 	 * @param        $post_id
 	 * @param string $userName
 	 *
-	 * @return \stdClass
+	 * @return stdClass
+	 * @throws Exception
 	 */
-	public function updatePost( $bodyhtml, $post_id, $userName = 'system' ): \stdClass {
+	public function updatePost( $bodyhtml, $post_id, $userName = 'system' ): stdClass {
 		$bodyraw = htmlspecialchars_decode( $bodyhtml );
 		$params  = [
 			'post[cooked]'      => $bodyhtml,
@@ -591,21 +625,40 @@ class DiscourseAPI {
 		return $this->_putRequest( '/posts/' . $post_id, [ $params ], $userName );
 	}
 
+	/**
+	 * updateUser()
+	 *
+	 *
+	 * @param        $bodyhtml
+	 * @param        $post_id
+	 * @param string $userName
+	 *
+	 * @return stdClass
+	 * @throws Exception
+	 */
+	public function updateUser( $userNameOrDiscourseUserId, $params ): stdClass {
+
+		return $this->_putRequest( '/u/' . $userNameOrDiscourseUserId . '.json', [ $params ], $userNameOrDiscourseUserId );
+	}
+
 	//////////////  TOPICS
 
-	/** @noinspection MoreThanThreeArgumentsInspection * */
 	/**
 	 * createTopic
 	 *
+	 * this creates a new topic, then makes the first post in the topic, from the $userName with the $bodyText
+	 *
 	 * @param string $topicTitle title of topic
-	 * @param string $bodyText body text of topic post
-	 * @param string $categoryId
-	 * @param string $userName user to create topic as
-	 * @param int $replyToId post id to reply as
+	 * @param string $bodyText   body text of topic post
+	 * @param string $categoryId must be Discourse category ID, can't be slug!
+	 * @param string $userName   user to create topic as
+	 * @param int    $replyToId  optional: post id to reply as
 	 *
 	 * @return mixed HTTP return code and API return object
-	 * @internal param string $categoryName category to create topic in
-	 **/
+	 *
+	 * @throws Exception
+	 * @noinspection MoreThanThreeArgumentsInspection
+	 */
 	public function createTopic(
 		string $topicTitle,
 		string $bodyText,
@@ -613,14 +666,20 @@ class DiscourseAPI {
 		string $userName,
 		int $replyToId = 0
 	) {
+
+		if ( ! $categoryId ) {
+			return false;
+		}
+
 		$params = [
 			'title'                => $topicTitle,
 			'raw'                  => $bodyText,
 			'category'             => $categoryId,
-			'archetype'            => 'regular',
+			'archetype'            => 'regular',        // not a private_message
 			'reply_to_post_number' => $replyToId,
 		];
 
+		// https://docs.discourse.org/#tag/Topics/paths/~1posts.json/post
 		return $this->_postRequest( '/posts', [ $params ], $userName );
 	}
 
@@ -629,9 +688,10 @@ class DiscourseAPI {
 	 *
 	 * @param $topicIdOrSlug
 	 *
-	 * @return \stdClass
+	 * @return stdClass
+	 * @throws Exception
 	 */
-	public function getTopic( $topicIdOrSlug ): \stdClass {
+	public function getTopic( $topicIdOrSlug ): stdClass {
 		return $this->_getRequest( "/t/{$topicIdOrSlug}.json" );
 	}
 
@@ -639,9 +699,10 @@ class DiscourseAPI {
 	 * topTopics
 	 *
 	 * @param string $category slug of category
-	 * @param string $period daily, weekly, monthly, yearly
+	 * @param string $period   daily, weekly, monthly, yearly
 	 *
 	 * @return mixed HTTP return code and API return object
+	 * @throws Exception
 	 */
 	public function topTopics( $category, $period = 'daily' ) {
 		return $this->_getRequest( '/c/' . $category . '/l/top/' . $period . '.json' );
@@ -653,6 +714,7 @@ class DiscourseAPI {
 	 * @param string $category slug of category
 	 *
 	 * @return mixed HTTP return code and API return object
+	 * @throws Exception
 	 */
 	public function latestTopics( $category ) {
 		return $this->_getRequest( '/c/' . $category . '/l/latest.json' );
@@ -661,12 +723,15 @@ class DiscourseAPI {
 	////////////// MISC
 
 	/**
+	 * change site setting
+	 *
 	 * @param $siteSetting
 	 * @param $value
 	 *
-	 * @return \stdClass
+	 * @return stdClass
+	 * @throws Exception
 	 */
-	public function changeSiteSetting( $siteSetting, $value ): \stdClass {
+	public function changeSiteSetting( $siteSetting, $value ): stdClass {
 		$params = [
 			$siteSetting => $value,
 		];
@@ -680,22 +745,27 @@ class DiscourseAPI {
 	/** @noinspection MoreThanThreeArgumentsInspection */
 	/**
 	 * @param string $reqString
-	 * @param array $paramArray
+	 * @param array  $paramArray
 	 * @param string $apiUser
 	 * @param string $HTTPMETHOD
 	 *
-	 * @return \stdClass
+	 * @return stdClass
 	 *
-	 **/
+	 * @throws Exception
+	 */
 	private function _getRequest(
 		string $reqString,
 		array $paramArray = [],
 		string $apiUser = 'system',
 		$HTTPMETHOD = 'GET'
-	): \stdClass {
+	): stdClass {
 		$paramArray['api_key']      = $this->_apiKey;
 		$paramArray['api_username'] = $apiUser;
 		$paramArray['show_emails']  = 'true';
+
+		if ( $this->debugGetRequest ) {
+			echo "\n\nDebug: making $HTTPMETHOD request: " . json_encode( $paramArray[0] ) . "\n\n";
+		}
 
 		$ch  = curl_init();
 		$url = sprintf( '%s://%s%s?%s', $this->_protocol, $this->_discourseHostname, $reqString,
@@ -710,7 +780,7 @@ class DiscourseAPI {
 		$rc   = curl_getinfo( $ch, CURLINFO_HTTP_CODE );
 		curl_close( $ch );
 
-		$resObj            = new \stdClass();
+		$resObj            = new stdClass();
 		$resObj->http_code = $rc;
 
 		// Only return valid json
@@ -720,28 +790,35 @@ class DiscourseAPI {
 			$resObj->apiresult = $json;
 		}
 
+		if ( $resObj->http_code == 429 ) {
+			throw new Exception( 'Rate limit', 429 );
+		}
+
 		return $resObj;
 	}
 
 	/** @noinspection MoreThanThreeArgumentsInspection * */
 	/**
 	 * @param string $reqString
-	 * @param array $paramArray
+	 * @param array  $paramArray
 	 * @param string $apiUser
 	 * @param string $HTTPMETHOD
 	 *
-	 * @return \stdClass
-	 **/
+	 * @return stdClass
+	 *
+	 * @throws Exception
+	 */
 	private function _putpostRequest(
 		string $reqString,
 		array $paramArray,
 		string $apiUser = 'system',
 		$HTTPMETHOD = 'POST'
-	): \stdClass {
+	): stdClass {
 
 		// set up headers for HTTP request we're about to make
 		$headers = [
-			'Content-Type: multipart/x-www-form-url-encoded',
+			//			'Content-Type: multipart/x-www-form-url-encoded',
+			'Content-Type: multipart/form-data',
 			'Api-Key: ' . $this->_apiKey,
 			'Api-Username: ' . $apiUser,
 		];
@@ -760,6 +837,10 @@ class DiscourseAPI {
 		}
 		$query = trim( $query, '&' );
 
+		if ( $this->debugPutPostRequest ) {
+			echo "\n\nDebug: making $HTTPMETHOD request: " . json_encode( $paramArray[0] ) . "\n\n";
+		}
+
 		// fire up curl and send request
 		$ch  = curl_init();
 		$url = sprintf( '%s://%s%s', $this->_protocol, $this->_discourseHostname,
@@ -776,7 +857,7 @@ class DiscourseAPI {
 		$rc   = curl_getinfo( $ch, CURLINFO_HTTP_CODE );
 		curl_close( $ch );
 
-		$resObj            = new \stdClass();
+		$resObj            = new stdClass();
 		$json              = json_decode( $body );
 		$resObj->apiresult = $body;
 		if ( json_last_error() === JSON_ERROR_NONE ) {
@@ -785,39 +866,46 @@ class DiscourseAPI {
 
 		$resObj->http_code = $rc;
 
+		if ( $resObj->http_code == 429 ) {
+			throw new Exception( 'Rate limit', 429 );
+		}
+
 		return $resObj;
 	}
 
 	/**
 	 * @param string $reqString
-	 * @param array $paramArray
+	 * @param array  $paramArray
 	 * @param string $apiUser
 	 *
-	 * @return \stdClass
+	 * @return stdClass
+	 * @throws Exception
 	 */
-	private function _deleteRequest( string $reqString, array $paramArray, string $apiUser = 'system' ): \stdClass {
+	private function _deleteRequest( string $reqString, array $paramArray, string $apiUser = 'system' ): stdClass {
 		return $this->_putpostRequest( $reqString, $paramArray, $apiUser, 'DELETE' );
 	}
 
 	/**
 	 * @param string $reqString
-	 * @param array $paramArray
+	 * @param array  $paramArray
 	 * @param string $apiUser
 	 *
-	 * @return \stdClass
+	 * @return stdClass
+	 * @throws Exception
 	 */
-	private function _putRequest( string $reqString, array $paramArray, string $apiUser = 'system' ): \stdClass {
+	private function _putRequest( string $reqString, array $paramArray, string $apiUser = 'system' ): stdClass {
 		return $this->_putpostRequest( $reqString, $paramArray, $apiUser, 'PUT' );
 	}
 
 	/**
 	 * @param string $reqString
-	 * @param array $paramArray
+	 * @param array  $paramArray
 	 * @param string $apiUser
 	 *
-	 * @return \stdClass
+	 * @return stdClass
+	 * @throws Exception
 	 */
-	private function _postRequest( string $reqString, array $paramArray, string $apiUser = 'system' ): \stdClass {
+	private function _postRequest( string $reqString, array $paramArray, string $apiUser = 'system' ): stdClass {
 		/** @noinspection ArgumentEqualsDefaultValueInspection * */
 		return $this->_putpostRequest( $reqString, $paramArray, $apiUser, 'POST' );
 	}
@@ -826,7 +914,7 @@ class DiscourseAPI {
 	 * DiscourseAPI constructor.
 	 *
 	 * @param string $discourseHostname
-	 * @param null $apiKey
+	 * @param null   $apiKey
 	 * @param string $protocol
 	 */
 	public function __construct( $discourseHostname, $apiKey = null, $protocol = 'https' ) {
