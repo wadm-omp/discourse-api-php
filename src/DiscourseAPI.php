@@ -426,7 +426,7 @@ class DiscourseAPI {
 	 */
 	public function createUser( string $name, string $userName, string $emailAddress, string $password, bool $activate = true ) {
 
-		// apparently we need to call hp.json to get a challenge string, not sure where/why, can't find in Discourse docs
+		// apparently we need to call hp.json to get a challenge string, not sure why, can't find in Discourse docs
 		$obj = $this->_getRequest( '/users/hp.json' );
 		if ( $obj->http_code !== 200 ) {
 			return false;
@@ -511,7 +511,7 @@ class DiscourseAPI {
 	public function getDiscourseUserIdFromExternalId( $externalID ) {
 		$res = $this->_getRequest( "/users/by-external/{$externalID}.json" );
 
-		if ( $res && is_object( $res ) ) {
+		if ( $res && is_object( $res ) && $res->apiresult->user->id ) {
 			return $res->apiresult->user->id;
 		}
 
@@ -824,10 +824,9 @@ class DiscourseAPI {
 		// prepare query body in x-www-form-url-encoded format
 		// see https://stackoverflow.com/questions/4007969/application-x-www-form-urlencoded-or-multipart-form-data
 
-		if ( is_array( $paramArray ) && in_array( 'file', array_keys( $paramArray ) ) ) {
+		if ( is_array( $paramArray ) && in_array( 'file', array_keys( $paramArray[0] ) ) ) {
 			// we are trying to upload a file, so we prepare the curl POSTFIELDS a little different
 			// see http://code.iamkate.com/php/sending-files-using-curl/
-
 			$query = [];
 			foreach ( $paramArray as $k => $v ) {
 				$query[ $k ] = $v;
@@ -848,7 +847,7 @@ class DiscourseAPI {
 		}
 
 		if ( $this->debugPutPostRequest ) {
-			echo "\n\nDebug: making $HTTPMETHOD request: " . json_encode( $paramArray ) . "\n\n";
+			echo "\n\nDebug: making $HTTPMETHOD request: " . json_encode( $paramArray ) . " - " . $query . "\n\n";
 		}
 
 		// fire up curl and send request
@@ -863,7 +862,7 @@ class DiscourseAPI {
 		curl_setopt( $ch, CURLOPT_CUSTOMREQUEST, $HTTPMETHOD );
 
 
-//		curl_setopt( $ch, CURLOPT_VERBOSE, 1 );
+		//		curl_setopt( $ch, CURLOPT_VERBOSE, 1 );
 
 
 		// make the call and get the results
