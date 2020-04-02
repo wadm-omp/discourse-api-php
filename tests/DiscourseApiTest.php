@@ -275,10 +275,10 @@ class DiscourseApiTest extends TestCase {
 	public function testSyncSso() {
 		$this->DiscourseAPI->setSsoSecret( $this->ssoSecret );
 
-		$userName     = $realName = 'erictest' . mt_rand( 10, 999 );
-		$emailAddress = 'eric+' . $userName . '@ericmueller.org';
-
 		$externalId = mt_rand( 1000, 9999 );
+
+		$userName     = $realName = 'test-user-' . $externalId;
+		$emailAddress = 'eric+' . $userName . '@ericmueller.org';
 
 		$otherParams = [
 			'require_activation' => 'false',
@@ -286,6 +286,8 @@ class DiscourseApiTest extends TestCase {
 		];
 
 		$res = $this->DiscourseAPI->syncSso( $emailAddress, $userName, $otherParams );
+
+		var_dump( $res );
 
 		// then let's be sure we got a valid result
 		$this->assertEquals( 200, $res->http_code );
