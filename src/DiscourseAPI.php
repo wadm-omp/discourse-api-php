@@ -40,7 +40,7 @@ class DiscourseAPI {
 	private $_discourseHostname;
 
 	private $debugGetRequest = false;
-	private $debugPutPostRequest = false;
+	private $debugPutPostRequest = true;
 
 	////////////////  Groups
 
@@ -823,20 +823,32 @@ class DiscourseAPI {
 
 		// prepare query body in x-www-form-url-encoded format
 		// see https://stackoverflow.com/questions/4007969/application-x-www-form-urlencoded-or-multipart-form-data
-		$query = '';
-		if ( isset( $paramArray['group'] ) && is_array( $paramArray['group'] ) ) {
-			$query = http_build_query( $paramArray );
+
+		if ( is_array( $paramArray ) && in_array( 'file', array_keys( $paramArray ) ) ) {
+			// we are trying to upload a file, so we prepare the curl POSTFIELDS a little different
+			// see http://code.iamkate.com/php/sending-files-using-curl/
+
+			$query = [];
+			foreach ( $paramArray as $k => $v ) {
+				$query[ $k ] = $v;
+			}
 		} else {
-			if ( is_array( $paramArray[0] ) ) {
-				foreach ( $paramArray[0] as $param => $value ) {
-					$query .= $param . '=' . urlencode( $value ) . '&';
+			// just build normal query here
+			$query = '';
+			if ( isset( $paramArray['group'] ) && is_array( $paramArray['group'] ) ) {
+				$query = http_build_query( $paramArray );
+			} else {
+				if ( is_array( $paramArray[0] ) ) {
+					foreach ( $paramArray[0] as $param => $value ) {
+						$query .= $param . '=' . urlencode( $value ) . '&';
+					}
 				}
 			}
+			$query = trim( $query, '&' );
 		}
-		$query = trim( $query, '&' );
 
 		if ( $this->debugPutPostRequest ) {
-			echo "\n\nDebug: making $HTTPMETHOD request: " . json_encode( $paramArray[0] ) . "\n\n";
+			echo "\n\nDebug: making $HTTPMETHOD request: " . json_encode( $paramArray ) . "\n\n";
 		}
 
 		// fire up curl and send request
@@ -850,9 +862,14 @@ class DiscourseAPI {
 		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
 		curl_setopt( $ch, CURLOPT_CUSTOMREQUEST, $HTTPMETHOD );
 
+
+//		curl_setopt( $ch, CURLOPT_VERBOSE, 1 );
+
+
 		// make the call and get the results
 		$body = curl_exec( $ch );
 		$rc   = curl_getinfo( $ch, CURLINFO_HTTP_CODE );
+
 		curl_close( $ch );
 
 		$resObj            = new stdClass();
@@ -919,5 +936,62 @@ class DiscourseAPI {
 		$this->_discourseHostname = $discourseHostname;
 		$this->_apiKey            = $apiKey;
 		$this->_protocol          = $protocol;
+	}
+
+	/**
+	 * upload image to Discourse
+	 * you have to do this before you can insert it into a message, or whatever
+	 *
+	 * @return object(stdClass)#13 (2) {
+	 * ["apiresult"]=>
+	 * object(stdClass)#16 (12) {
+	 * ["id"]=>
+	 * int(24)
+	 * ["url"]=>
+	 * string(74) "/uploads/default/original/1X/7831a3ef6e0ee3c584037a2f0bc3d476db2650eb.jpeg"
+	 * ["original_filename"]=>
+	 * string(12) "cat face.jpg"
+	 * ["filesize"]=>
+	 * int(84958)
+	 * ["width"]=>
+	 * int(768)
+	 * ["height"]=>
+	 * int(960)
+	 * ["thumbnail_width"]=>
+	 * int(400)
+	 * ["thumbnail_height"]=>
+	 * int(500)
+	 * ["extension"]=>
+	 * string(4) "jpeg"
+	 * ["short_url"]=>
+	 * string(41) "upload://h9hEkn0sHg4AGsq4EbOfNNx41T5.jpeg"
+	 * ["retain_hours"]=>
+	 * NULL
+	 * ["human_filesize"]=>
+	 * string(5) "83 KB"
+	 * }
+	 * ["http_code"]=>
+	 * int(200)
+	 * }
+	 *
+	 * @param string $fullPath
+	 *
+	 * @return stdClass
+	 * @throws Exception
+	 */
+	public function uploadImage( string $fullPath, string $filename, string $mimeFiletype ) {
+		// see https://www.php.net/manual/en/class.curlfile.php
+		$cfile = new \CURLFile( $fullPath, $mimeFiletype, $filename ); // try adding
+
+		$cfile->type = 'upload';
+
+		$type = new \CURLFile( 'upload', '', 'type' ); // try adding
+
+		$params = [
+			'file' => $cfile,
+			'type' => 'upload',
+		];
+
+		return $this->_postRequest( '/uploads.json', $params );
 	}
 }
