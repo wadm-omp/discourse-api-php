@@ -179,8 +179,29 @@ class DiscourseApiTest extends TestCase {
 
 		$res = $this->DiscourseAPI->createPost( $bodyText2, $topicResult->apiresult->topic_id, 'system', $dt );
 
-
 		var_dump( $res );
+
+	}
+
+
+	/**
+	 * @throws Exception
+	 * @group upload
+	 */
+
+	public function testUploadImage() {
+		$fullPath = __DIR__ . '/judgingcat.jpg';
+
+		$res = $this->DiscourseAPI->uploadImage( $fullPath, 'judging cat', 'image/jpeg' );
+		var_dump( $res );
+
+		// first let's be sure we got an object back!
+		$this->assertIsObject( $res );
+		$this->assertIsObject( $res->apiresult );
+
+		// then let's be sure we got a valid result
+		$this->assertEquals( 200, $res->http_code );
+		$this->assertIsString( $res->apiresult->url );
 
 	}
 
