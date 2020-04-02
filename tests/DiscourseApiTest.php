@@ -198,8 +198,10 @@ class DiscourseApiTest extends TestCase {
 	public function testUploadImage() {
 		$fullPath = __DIR__ . '/judgingcat.jpg';
 
+		$this->DiscourseAPI->setDebugPutPostRequest( true );
+
 		$res = $this->DiscourseAPI->uploadImage( $fullPath, 'judging cat', 'image/jpeg' );
-		// var_dump( $res );
+		var_dump( $res );
 
 		// first let's be sure we got an object back!
 		$this->assertIsObject( $res );
