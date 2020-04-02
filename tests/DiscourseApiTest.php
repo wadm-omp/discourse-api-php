@@ -13,6 +13,7 @@ class DiscourseApiTest extends TestCase {
 
 	private $testCategory;
 	private $testTopic;
+	private $ssoSecret;
 
 
 	protected function setUp() {
@@ -27,6 +28,11 @@ class DiscourseApiTest extends TestCase {
 		                                        $_ENV['DISCOURSE_PROTOCOL'] );
 
 		$this->testUserName = $_ENV['DISCOURSE_TEST_USERNAME'];
+
+		$this->ssoSecret = $_ENV['DISCOURSE_SSO_SECRET'];
+
+		// this dumps lots of stuff to the screen when set to true
+		$this->DiscourseAPI->setDebugPutPostRequest( true );
 	}
 
 	/**
@@ -179,7 +185,7 @@ class DiscourseApiTest extends TestCase {
 
 		$res = $this->DiscourseAPI->createPost( $bodyText2, $topicResult->apiresult->topic_id, 'system', $dt );
 
-		var_dump( $res );
+		// var_dump( $res );
 
 	}
 
@@ -193,7 +199,7 @@ class DiscourseApiTest extends TestCase {
 		$fullPath = __DIR__ . '/judgingcat.jpg';
 
 		$res = $this->DiscourseAPI->uploadImage( $fullPath, 'judging cat', 'image/jpeg' );
-		var_dump( $res );
+		// var_dump( $res );
 
 		// first let's be sure we got an object back!
 		$this->assertIsObject( $res );
@@ -201,6 +207,7 @@ class DiscourseApiTest extends TestCase {
 
 		// then let's be sure we got a valid result
 		$this->assertEquals( 200, $res->http_code );
+
 		$this->assertIsString( $res->apiresult->url );
 
 	}
@@ -238,8 +245,7 @@ class DiscourseApiTest extends TestCase {
 
 
 	/**
-	 *
-	 * @group users
+	 * test create user, and set user info
 	 */
 	public function testCreateUser() {
 		$userName     = $realName = 'erictest' . mt_rand( 10, 999 );
@@ -248,29 +254,75 @@ class DiscourseApiTest extends TestCase {
 
 		$res = $this->DiscourseAPI->createUser( $realName, $userName, $emailAddress, $password );
 
+		// then let's be sure we got a valid result
+		$this->assertEquals( 200, $res->http_code );
 		$this->assertGreaterThan( 0, $res->apiresult->user_id, 'User ID is 0' );
 		$this->assertEquals( true, $res->apiresult->success, 'createUser did not return success' );
 
 		$r = $this->DiscourseAPI->setUserInfo( $userName, [ 'location' => 'At home right now' ] );
-		var_dump( $r );
+
+		// then let's be sure we got a valid result
+		$this->assertEquals( 200, $res->http_code );
+
+		// var_dump( $r );
 	}
 
-//	/**
-//	 */
-//	public function testSetUserInfo() {
-//
-//		$testUserName = 'dummyaccount' . mt_rand( 0, 999 );
-//
-//		$params = [
-//			'location' => 'Home!',
-//		];
-//
-//
-//		$res = $this->DiscourseAPI->setUserInfo( $testUserName, $params );
-//
-//		var_dump( $res );
-//	}
-//
-	// TODO: write lots more tests ;-)
 
+	/**
+	 *
+	 * @group users
+	 */
+	public function testSyncSso() {
+		$this->DiscourseAPI->setSsoSecret( $this->ssoSecret );
+
+		$userName     = $realName = 'erictest' . mt_rand( 10, 999 );
+		$emailAddress = 'eric+' . $userName . '@ericmueller.org';
+
+		$externalId = mt_rand( 1000, 9999 );
+
+		$otherParams = [
+			'require_activation' => 'false',
+			'external_id'        => $externalId,
+		];
+
+		$res = $this->DiscourseAPI->syncSso( $emailAddress, $userName, $otherParams );
+
+		// then let's be sure we got a valid result
+		$this->assertEquals( 200, $res->http_code );
+
+		if ( $res->apiresult->single_sign_on_record ) {
+			//var_dump( $res->apiresult->single_sign_on_record );
+		}
+
+		/*
+		 $res->apiresult->single_sign_on_record =
+			object(stdClass)#16 (11) {
+			  ["user_id"]=>
+			  int(19)
+			  ["external_id"]=>
+			  string(4) "6754"
+			  ["last_payload"]=>
+			  string(103) "email=eric%2Berictest52%40ericmueller.org&external_id=6754&require_activation=false&username=erictest52"
+			  ["created_at"]=>
+			  string(24) "2020-04-02T14:37:55.759Z"
+			  ["updated_at"]=>
+			  string(24) "2020-04-02T14:37:55.759Z"
+			  ["external_username"]=>
+			  string(10) "erictest52"
+			  ["external_email"]=>
+			  string(31) "eric+erictest52@ericmueller.org"
+			  ["external_name"]=>
+			  NULL
+			  ["external_avatar_url"]=>
+			  NULL
+			  ["external_profile_background_url"]=>
+			  NULL
+			  ["external_card_background_url"]=>
+			  NULL
+			}
+    */
+
+	}
+
+	// TODO: write lots more tests ;-)
 }

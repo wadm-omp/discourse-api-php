@@ -39,8 +39,13 @@ class DiscourseAPI {
 	 */
 	private $_discourseHostname;
 
+	/**
+	 * @var string secret key for SSO
+	 */
+	protected $sso_secret;
+
 	private $debugGetRequest = false;
-	private $debugPutPostRequest = true;
+	private $debugPutPostRequest = false;
 
 	////////////////  Groups
 
@@ -411,7 +416,6 @@ class DiscourseAPI {
 	}
 
 
-	/** @noinspection MoreThanThreeArgumentsInspection */
 	/**
 	 * createUser
 	 *
@@ -423,8 +427,9 @@ class DiscourseAPI {
 	 *
 	 * @return mixed HTTP return code and API return object
 	 * @throws Exception
+	 * @noinspection MoreThanThreeArgumentsInspection
 	 */
-	public function createUser( string $name, string $userName, string $emailAddress, string $password, bool $activate = true ) {
+	public function createUser( string $name, string $userName, string $emailAddress, string $password, bool $activate = true, int $external_id = 0 ) {
 
 		// apparently we need to call hp.json to get a challenge string, not sure why, can't find in Discourse docs
 		$obj = $this->_getRequest( '/users/hp.json' );
@@ -995,4 +1000,65 @@ class DiscourseAPI {
 
 		return $this->_postRequest( '/uploads.json', $params );
 	}
+
+	/**
+	 * @param       $email
+	 * @param       $username
+	 * @param array $otherParameters external_id, add_groups, require_activation
+	 *
+	 * @return stdClass
+	 * @throws Exception
+	 */
+	public function syncSso( $email, $username, array $otherParameters = [] ) {
+		// Create an array of SSO parameters.
+		$sso_params = [
+			'email'    => $email,
+			'username' => $username,
+		];
+
+		if ( $otherParameters ) {
+			$sso_params = array_merge( $sso_params, $otherParameters );
+		}
+
+		// Convert the SSO parameters into the SSO payload and generate the SSO signature.
+		$sso_payload = base64_encode( http_build_query( $sso_params ) );
+		$sig         = hash_hmac( 'sha256', $sso_payload, $this->sso_secret );
+
+		$url         = 'https://forum.example.com/admin/users/sync_sso';
+		$post_fields = [
+			'sso' => $sso_payload,
+			'sig' => $sig,
+		];
+
+		return $this->_postRequest( '/admin/users/sync_sso', [ $post_fields ] );
+	}
+
+	/**
+	 * @return string
+	 */
+	public function getSsoSecret(): string {
+		return $this->sso_secret;
+	}
+
+	/**
+	 * @param string $sso_secret
+	 */
+	public function setSsoSecret( string $sso_secret ): void {
+		$this->sso_secret = $sso_secret;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function isDebugPutPostRequest(): bool {
+		return $this->debugPutPostRequest;
+	}
+
+	/**
+	 * @param bool $debugPutPostRequest
+	 */
+	public function setDebugPutPostRequest( bool $debugPutPostRequest ): void {
+		$this->debugPutPostRequest = $debugPutPostRequest;
+	}
+
 }
