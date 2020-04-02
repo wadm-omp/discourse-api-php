@@ -750,7 +750,7 @@ class DiscourseAPI {
 	 * @param string $reqString
 	 * @param array  $paramArray
 	 * @param string $apiUser
-	 * @param string $HTTPMETHOD
+	 * @param string $httpMethod
 	 *
 	 * @return stdClass
 	 *
@@ -760,14 +760,14 @@ class DiscourseAPI {
 		string $reqString,
 		array $paramArray = [],
 		string $apiUser = 'system',
-		$HTTPMETHOD = 'GET'
+		$httpMethod = 'GET'
 	): stdClass {
 		$paramArray['api_key']      = $this->_apiKey;
 		$paramArray['api_username'] = $apiUser;
 		$paramArray['show_emails']  = 'true';
 
 		if ( $this->debugGetRequest ) {
-			echo "\n\nDebug: making $HTTPMETHOD request: " . json_encode( $paramArray[0] ) . "\n\n";
+			echo "\nDiscourse-API DEBUG: making $httpMethod request: " . json_encode( $paramArray[0] ) . "\n";
 		}
 
 		$ch  = curl_init();
@@ -775,7 +775,7 @@ class DiscourseAPI {
 		                http_build_query( $paramArray ) );
 
 		curl_setopt( $ch, CURLOPT_URL, $url );
-		curl_setopt( $ch, CURLOPT_CUSTOMREQUEST, $HTTPMETHOD );
+		curl_setopt( $ch, CURLOPT_CUSTOMREQUEST, $httpMethod );
 		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
 		curl_setopt( $ch, CURLOPT_FOLLOWLOCATION, true );
 
@@ -805,7 +805,7 @@ class DiscourseAPI {
 	 * @param string $reqString
 	 * @param array  $paramArray
 	 * @param string $apiUser
-	 * @param string $HTTPMETHOD
+	 * @param string $httpMethod
 	 *
 	 * @return stdClass
 	 *
@@ -815,7 +815,7 @@ class DiscourseAPI {
 		string $reqString,
 		array $paramArray,
 		string $apiUser = 'system',
-		$HTTPMETHOD = 'POST'
+		$httpMethod = 'POST'
 	): stdClass {
 
 		// set up headers for HTTP request we're about to make
@@ -853,7 +853,8 @@ class DiscourseAPI {
 		}
 
 		if ( $this->debugPutPostRequest ) {
-			echo "\n\nDebug: making $HTTPMETHOD request: " . json_encode( $paramArray ) . " - " . $query . "\n\n";
+			$queryDebug = is_array( $query ) ? json_encode( $query ) : $query;
+			echo "\nDiscourse-API DEBUG: making $httpMethod request: " . json_encode( $paramArray ) . " - " . $queryDebug . "\n";
 		}
 
 		// fire up curl and send request
@@ -865,11 +866,9 @@ class DiscourseAPI {
 		curl_setopt( $ch, CURLOPT_HTTPHEADER, $headers );
 		curl_setopt( $ch, CURLOPT_POSTFIELDS, $query );
 		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
-		curl_setopt( $ch, CURLOPT_CUSTOMREQUEST, $HTTPMETHOD );
+		curl_setopt( $ch, CURLOPT_CUSTOMREQUEST, $httpMethod );
 
-
-		//		curl_setopt( $ch, CURLOPT_VERBOSE, 1 );
-
+		// curl_setopt( $ch, CURLOPT_VERBOSE, 1 );
 
 		// make the call and get the results
 		$body = curl_exec( $ch );
@@ -989,8 +988,6 @@ class DiscourseAPI {
 		$cfile = new \CURLFile( $fullPath, $mimeFiletype, $filename ); // try adding
 
 		$cfile->type = 'upload';
-
-		$type = new \CURLFile( 'upload', '', 'type' ); // try adding
 
 		$params = [
 			'file'       => $cfile,
