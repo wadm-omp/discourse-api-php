@@ -248,15 +248,15 @@ class DiscourseAPI {
 	}
 
 	/**
-	 * get info on a single category - by category ID or slug
+	 * get info on a single category - by category ID only
 	 *
-	 * @param $categoryIdOrSlug
+	 * @param $categoryId
 	 *
 	 * @return stdClass
 	 * @throws Exception
 	 */
-	public function getCategory( $categoryIdOrSlug ): stdClass {
-		return $this->_getRequest( "/c/{$categoryIdOrSlug}.json" );
+	public function getCategory( $categoryId ): stdClass {
+		return $this->_getRequest( "/c/{$categoryId}.json" );
 	}
 
 	/** @noinspection MoreThanThreeArgumentsInspection * */
@@ -506,7 +506,7 @@ class DiscourseAPI {
 	}
 
 	/**
-	 * getUserByExternalID
+	 * getUserIdByExternalID
 	 *
 	 * @param string $externalID external id of sso user
 	 *
@@ -514,10 +514,28 @@ class DiscourseAPI {
 	 * @throws Exception
 	 */
 	public function getDiscourseUserIdFromExternalId( $externalID ) {
+		$res = $this->getDiscourseUserFromExternalId( $externalID );
+
+		if ( $res ) {
+			return $res->id;
+		}
+
+		return false;
+	}
+
+	/**
+	 * getDiscourseUserByExternalID
+	 *
+	 * @param string $externalID external id of sso user
+	 *
+	 * @return mixed HTTP return code and API return object
+	 * @throws Exception
+	 */
+	public function getDiscourseUserFromExternalId( $externalID ) {
 		$res = $this->_getRequest( "/users/by-external/{$externalID}.json" );
 
 		if ( $res && is_object( $res ) && $res->apiresult->user->id ) {
-			return $res->apiresult->user->id;
+			return $res->apiresult->user;
 		}
 
 		return false;
@@ -820,7 +838,7 @@ class DiscourseAPI {
 
 		// set up headers for HTTP request we're about to make
 		$headers = [
-			//			'Content-Type: multipart/x-www-form-url-encoded',
+			// see https://stackoverflow.com/questions/4007969/application-x-www-form-urlencoded-or-multipart-form-data
 			'Content-Type: multipart/form-data',
 			'Api-Key: ' . $this->_apiKey,
 			'Api-Username: ' . $apiUser,

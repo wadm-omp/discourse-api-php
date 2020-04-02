@@ -294,10 +294,13 @@ class DiscourseApiTest extends TestCase {
 		// then let's be sure we got a valid result
 		$this->assertEquals( 200, $res->http_code );
 
-		if ( $res->apiresult->single_sign_on_record ) {
-			//var_dump( $res->apiresult->single_sign_on_record );
-		}
+		//		if ( $res->apiresult->single_sign_on_record ) {
+		//			//var_dump( $res->apiresult->single_sign_on_record );
+		//		}
 
+		$res = $this->DiscourseAPI->getDiscourseUserFromExternalId( $res->apiresult->single_sign_on_record->external_id );
+
+		var_dump( $res );
 		/*
 		 $res->apiresult->single_sign_on_record =
 			object(stdClass)#16 (11) {
@@ -325,8 +328,33 @@ class DiscourseApiTest extends TestCase {
 			  NULL
 			}
     */
+	}
+
+
+	/**
+	 * @throws Exception
+	 */
+	function testGetUserByUsername() {
+		$res = $this->DiscourseAPI->getUserByUsername( 'deleted-user' );
+		var_dump( $res );
+	}
+
+
+	/**
+	 * @throws Exception
+	 * @group quicktest
+	 */
+	function testGetCategoriesAgain() {
+		$res = $this->DiscourseAPI->getCategories();
+
+		var_dump( $res );
+
+		foreach ( $res->apiresult->category_list->categories as $k ) {
+			echo $k->id . ' - ' . $k->name . "\n";
+		}
 
 	}
+
 
 	// TODO: write lots more tests ;-)
 }
