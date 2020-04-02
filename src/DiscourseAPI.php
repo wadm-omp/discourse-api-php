@@ -824,7 +824,8 @@ class DiscourseAPI {
 		// prepare query body in x-www-form-url-encoded format
 		// see https://stackoverflow.com/questions/4007969/application-x-www-form-urlencoded-or-multipart-form-data
 
-		if ( is_array( $paramArray ) && in_array( 'file', array_keys( $paramArray[0] ) ) ) {
+		// special flag for upload file!
+		if ( $paramArray['uploadFile'] ) {
 			// we are trying to upload a file, so we prepare the curl POSTFIELDS a little different
 			// see http://code.iamkate.com/php/sending-files-using-curl/
 			$query = [];
@@ -987,8 +988,9 @@ class DiscourseAPI {
 		$type = new \CURLFile( 'upload', '', 'type' ); // try adding
 
 		$params = [
-			'file' => $cfile,
-			'type' => 'upload',
+			'file'       => $cfile,
+			'type'       => 'upload',
+			'uploadFile' => true,
 		];
 
 		return $this->_postRequest( '/uploads.json', $params );

@@ -255,22 +255,22 @@ class DiscourseApiTest extends TestCase {
 		var_dump( $r );
 	}
 
-	/**
-	 */
-	public function testSetUserInfo() {
-
-		$testUserName = 'dummyaccount' . mt_rand( 0, 999 );
-
-		$params = [
-			'location' => 'Home!',
-		];
-
-
-		$res = $this->DiscourseAPI->setUserInfo( $testUserName, $params );
-
-		var_dump( $res );
-	}
-
+//	/**
+//	 */
+//	public function testSetUserInfo() {
+//
+//		$testUserName = 'dummyaccount' . mt_rand( 0, 999 );
+//
+//		$params = [
+//			'location' => 'Home!',
+//		];
+//
+//
+//		$res = $this->DiscourseAPI->setUserInfo( $testUserName, $params );
+//
+//		var_dump( $res );
+//	}
+//
 	// TODO: write lots more tests ;-)
 
 }
