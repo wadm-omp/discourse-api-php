@@ -765,7 +765,7 @@ class DiscourseAPI {
 
 	/** @noinspection MoreThanThreeArgumentsInspection */
 	/**
-	 * @param string $reqString
+	 * @param string $requestString
 	 * @param array  $paramArray
 	 * @param string $apiUser
 	 * @param string $httpMethod
@@ -775,10 +775,10 @@ class DiscourseAPI {
 	 * @throws Exception
 	 */
 	private function _getRequest(
-		string $reqString,
+		string $requestString,
 		array $paramArray = [],
 		string $apiUser = 'system',
-		$httpMethod = 'GET'
+		string $httpMethod = 'GET'
 	): stdClass {
 		$paramArray['show_emails'] = 'true';
 
@@ -789,11 +789,11 @@ class DiscourseAPI {
 		];
 
 		if ( $this->debugGetRequest ) {
-			echo "\nDiscourse-API DEBUG: making $httpMethod request: " . json_encode( $paramArray[0] ) . "\n";
+			echo "\nDiscourse-API DEBUG: making $httpMethod request: $requestString, parameters: " . json_encode( $paramArray ) . " \n";
 		}
 
 		$ch  = curl_init();
-		$url = sprintf( '%s://%s%s?%s', $this->_protocol, $this->_discourseHostname, $reqString,
+		$url = sprintf( '%s://%s%s?%s', $this->_protocol, $this->_discourseHostname, $requestString,
 		                http_build_query( $paramArray ) );
 
 		curl_setopt( $ch, CURLOPT_URL, $url );
