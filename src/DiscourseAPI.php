@@ -780,9 +780,13 @@ class DiscourseAPI {
 		string $apiUser = 'system',
 		$httpMethod = 'GET'
 	): stdClass {
-		$paramArray['api_key']      = $this->_apiKey;
-		$paramArray['api_username'] = $apiUser;
-		$paramArray['show_emails']  = 'true';
+		$paramArray['show_emails'] = 'true';
+
+		// set up headers for HTTP request we're about to make
+		$headers = [
+			'Api-Key: ' . $this->_apiKey,
+			'Api-Username: ' . $apiUser,
+		];
 
 		if ( $this->debugGetRequest ) {
 			echo "\nDiscourse-API DEBUG: making $httpMethod request: " . json_encode( $paramArray[0] ) . "\n";
@@ -795,6 +799,7 @@ class DiscourseAPI {
 		curl_setopt( $ch, CURLOPT_URL, $url );
 		curl_setopt( $ch, CURLOPT_CUSTOMREQUEST, $httpMethod );
 		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
+		curl_setopt( $ch, CURLOPT_HTTPHEADER, $headers );
 		curl_setopt( $ch, CURLOPT_FOLLOWLOCATION, true );
 
 		$body = curl_exec( $ch );
