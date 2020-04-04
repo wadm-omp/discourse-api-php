@@ -600,13 +600,13 @@ class DiscourseAPI {
 	 *
 	 * @param string   $bodyText
 	 * @param int      $topicId
-	 * @param string   $userName
+	 * @param string   $username
 	 * @param DateTime $createDateTime create date/time for the post
 	 *
 	 * @return stdClass
 	 * @throws Exception
 	 */
-	public function createPost( string $bodyText, int $topicId, string $userName, DateTime $createDateTime ): stdClass {
+	public function createPost( string $bodyText, int $topicId, string $username, DateTime $createDateTime ): stdClass {
 		$params = [
 			'raw'       => $bodyText,
 			'archetype' => 'regular',
@@ -618,7 +618,7 @@ class DiscourseAPI {
 			$params ['created_at'] = $createDateTime->format( 'c' );
 		}
 
-		return $this->_postRequest( '/posts', [ $params ], $userName );
+		return $this->_postRequest( '/posts', [ $params ], $username );
 	}
 
 	/**
@@ -789,7 +789,7 @@ class DiscourseAPI {
 		];
 
 		if ( $this->debugGetRequest ) {
-			echo "\nDiscourse-API DEBUG: making $httpMethod request: $requestString, parameters: " . json_encode( $paramArray ) . " \n";
+			echo "\nDiscourse-API DEBUG: user '" . $apiUser . "' making $httpMethod request: $requestString, parameters: " . json_encode( $paramArray ) . " \n";
 		}
 
 		$ch  = curl_init();
@@ -877,7 +877,7 @@ class DiscourseAPI {
 
 		if ( $this->debugPutPostRequest ) {
 			$queryDebug = is_array( $query ) ? json_encode( $query ) : $query;
-			echo "\nDiscourse-API DEBUG: making $httpMethod request: $reqString, parameters: " . json_encode( $paramArray ) . " - " . $queryDebug . "\n";
+			echo "\nDiscourse-API DEBUG: user '" . $apiUser . "' making $httpMethod request: $reqString, parameters: " . json_encode( $paramArray ) . " - " . $queryDebug . "\n";
 		}
 
 		// fire up curl and send request
