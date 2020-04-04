@@ -183,9 +183,9 @@ class DiscourseApiTest extends TestCase {
 
 		$dt->setTimestamp( 1571307742 );        // 17 oct 2019, 12:22:22 pm local time [zurich]
 
-		$res = $this->DiscourseAPI->createPost( $bodyText2, $topicResult->apiresult->topic_id, 'system', $dt );
+		$res = $this->DiscourseAPI->createPost( $bodyText2, $topicResult->apiresult->topic_id, 'max001', $dt );
 
-		// var_dump( $res );
+		var_dump( $res );
 
 	}
 
