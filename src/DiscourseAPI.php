@@ -1081,4 +1081,18 @@ class DiscourseAPI {
 		$this->debugPutPostRequest = $debugPutPostRequest;
 	}
 
+	/**
+	 * @return bool
+	 */
+	public function isDebugGetRequest(): bool {
+		return $this->debugGetRequest;
+	}
+
+	/**
+	 * @param bool $debugGetRequest
+	 */
+	public function setDebugGetRequest( bool $debugGetRequest ): void {
+		$this->debugGetRequest = $debugGetRequest;
+	}
+
 }
