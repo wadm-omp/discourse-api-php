@@ -877,7 +877,7 @@ class DiscourseAPI {
 
 		if ( $this->debugPutPostRequest ) {
 			$queryDebug = is_array( $query ) ? json_encode( $query ) : $query;
-			echo "\nDiscourse-API DEBUG: making $httpMethod request: " . json_encode( $paramArray ) . " - " . $queryDebug . "\n";
+			echo "\nDiscourse-API DEBUG: making $httpMethod request: $reqString, parameters: " . json_encode( $paramArray ) . " - " . $queryDebug . "\n";
 		}
 
 		// fire up curl and send request
