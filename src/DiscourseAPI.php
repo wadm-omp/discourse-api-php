@@ -8,7 +8,7 @@
  * @category     DiscourseAPI
  * @package      DiscourseAPI
  * @author       Original author DiscourseHosting <richard@discoursehosting.com>
- * Additional work, timolaine, richp10 and others..
+ * Additional work, timolaine, richp10, pnoeric and others..
  * @copyright    2013, DiscourseHosting.com
  * @license      http://www.gnu.org/licenses/gpl-2.0.html GPLv2
  * @link         https://github.com/richp10/discourse-api-php
@@ -18,6 +18,7 @@
 
 namespace pnoeric\discourseAPI;
 
+use Cassandra\Date;
 use DateTime;
 use Exception;
 use stdClass;
@@ -408,11 +409,46 @@ class DiscourseAPI {
 	 */
 	public function logoutUserById( int $discourseUserId ) {
 
-		if ( ! is_int( $discourseUserId ) ) {
-			return false;
-		}
-
 		return $this->_postRequest( '/admin/users/' . $discourseUserId . '/log_out', [] );
+	}
+
+	/**
+	 * unsuspend user - by user ID
+	 *
+	 * @param string $discourseUserId
+	 *
+	 * @return mixed HTTP return code and API return object
+	 * @throws Exception
+	 */
+	public function unsuspendUserById( int $discourseUserId ) {
+		return $this->_putRequest( '/admin/users/' . $discourseUserId . '/unsuspend', [] );
+	}
+
+
+	/**
+	 * suspend user - by user ID
+	 *
+	 * @param int      $discourseUserId
+	 *
+	 * @param DateTime $until
+	 * @param          $reason
+	 *
+	 * @return mixed HTTP return code and API return object
+	 * @throws Exception
+	 */
+	public function suspendUserById( int $discourseUserId, \DateTime $until, $reason ) {
+
+		// format 'c' = 2004-02-12T15:19:21+00:00
+		$date = substr( $until->format( 'c' ), 0, 10 );
+
+		$params = [
+			'suspend_until' => $date,
+			'reason'        => $reason,
+			'message'       => '',
+			'post_action'   => 'delete',
+		];
+
+		return $this->_putRequest( '/admin/users/' . $discourseUserId . '/suspend', [ $params ] );
 	}
 
 
@@ -841,13 +877,7 @@ class DiscourseAPI {
 		$httpMethod = 'POST'
 	): stdClass {
 
-		// set up headers for HTTP request we're about to make
-		$headers = [
-			// see https://stackoverflow.com/questions/4007969/application-x-www-form-urlencoded-or-multipart-form-data
-			'Content-Type: multipart/form-data',
-			'Api-Key: ' . $this->_apiKey,
-			'Api-Username: ' . $apiUser,
-		];
+		$type = 'multipart/form-data';
 
 		// prepare query body in x-www-form-url-encoded format
 		// see https://stackoverflow.com/questions/4007969/application-x-www-form-urlencoded-or-multipart-form-data
@@ -877,8 +907,16 @@ class DiscourseAPI {
 
 		if ( $this->debugPutPostRequest ) {
 			$queryDebug = is_array( $query ) ? json_encode( $query ) : $query;
-			echo "\nDiscourse-API DEBUG: user '" . $apiUser . "' making $httpMethod request: $reqString, parameters: " . json_encode( $paramArray ) . " - " . $queryDebug . "\n";
+			echo "\nDiscourse-API DEBUG: user '" . $apiUser . "' making $httpMethod request: $reqString, parameters: " . json_encode( $paramArray ) . " - " . $queryDebug . "\n\n";
 		}
+
+		// set up headers for HTTP request we're about to make
+		$headers = [
+			// see https://stackoverflow.com/questions/4007969/application-x-www-form-urlencoded-or-multipart-form-data
+			'Content-Type: ' . $type,
+			'Api-Key: ' . $this->_apiKey,
+			'Api-Username: ' . $apiUser,
+		];
 
 		// fire up curl and send request
 		$ch  = curl_init();

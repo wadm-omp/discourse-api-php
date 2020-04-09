@@ -339,6 +339,39 @@ class DiscourseApiTest extends TestCase {
 		var_dump( $res );
 	}
 
+	/**
+	 * @group suspend
+	 * @throws Exception
+	 */
+	function testSuspend() {
+
+		$id = $this->DiscourseAPI->getDiscourseUserIdFromExternalId( 860838 );
+
+		// one year from now
+		$until = new DateTime();
+		$until->setTimestamp( time() + ( 60 * 60 * 24 * 365 ) );
+		$reason = 'This member has decided to suspend their own account temporarily.';
+
+		$id  = 4;
+
+		$res = $this->DiscourseAPI->suspendUserById( $id, $until, $reason );
+		die();
+	}
+
+	/**
+	 * @group unsuspend
+	 * @throws Exception
+	 */
+	function testUnsuspend() {
+
+		$id = $this->DiscourseAPI->getDiscourseUserIdFromExternalId( 860838 );
+
+
+		$id  = 4;
+		$res = $this->DiscourseAPI->unsuspendUserById( $id );
+		die();
+	}
+
 
 	/**
 	 * @throws Exception
