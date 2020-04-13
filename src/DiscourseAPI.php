@@ -530,6 +530,18 @@ class DiscourseAPI {
 	}
 
 	/**
+	 * getUserById (internal ID)
+	 *
+	 * @param int $id discourse (non-external) ID
+	 *
+	 * @return mixed HTTP return code and API return object
+	 * @throws Exception
+	 */
+	public function getUserByDiscourseId( $id ) {
+		return $this->_getRequest( "/admin/users/{$id}.json" );
+	}
+
+	/**
 	 * getUserByExternalID
 	 *
 	 * @param string $externalID external id of sso user

@@ -332,10 +332,14 @@ class DiscourseApiTest extends TestCase {
 
 
 	/**
+	 * @group userbyusername
 	 * @throws Exception
 	 */
 	function testGetUserByUsername() {
-		$res = $this->DiscourseAPI->getUserByUsername( 'deleted-user' );
+
+		$this->DiscourseAPI->setDebugGetRequest( true );
+
+		$res = $this->DiscourseAPI->getUserByDiscourseId( 3 );
 		var_dump( $res );
 	}
 
