@@ -359,7 +359,6 @@ class DiscourseAPI {
 			}
 		}
 
-		# This must PUT
 		return $this->_putRequest( '/categories/' . $catid, [ $params ] );
 	}
 
@@ -1168,11 +1167,22 @@ class DiscourseAPI {
 	}
 
 	/**
+	 * @param bool $debugGetRequest
 	 */
+	public function setDebugGetRequest( bool $debugGetRequest ): void {
+		$this->debugGetRequest = $debugGetRequest;
 	}
 
+
 	/**
+	 * @param $username
+	 * @param $params
+	 *
+	 * @return stdClass
+	 * @throws Exception
 	 */
+	public function setUserField( $username, $params ) {
+		return $this->_putRequest( '/users/' . $username, [ $params ] );
 	}
 
 }
