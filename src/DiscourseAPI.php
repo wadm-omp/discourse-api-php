@@ -1161,13 +1161,6 @@ class DiscourseAPI {
 	}
 
 	/**
-	 * @return bool
-	 */
-	public function isDebugPutPostRequest(): bool {
-		return $this->debugPutPostRequest;
-	}
-
-	/**
 	 * @param bool $debugPutPostRequest
 	 */
 	public function setDebugPutPostRequest( bool $debugPutPostRequest ): void {
@@ -1175,17 +1168,11 @@ class DiscourseAPI {
 	}
 
 	/**
-	 * @return bool
 	 */
-	public function isDebugGetRequest(): bool {
-		return $this->debugGetRequest;
 	}
 
 	/**
-	 * @param bool $debugGetRequest
 	 */
-	public function setDebugGetRequest( bool $debugGetRequest ): void {
-		$this->debugGetRequest = $debugGetRequest;
 	}
 
 }
