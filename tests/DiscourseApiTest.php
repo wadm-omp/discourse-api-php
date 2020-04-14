@@ -330,9 +330,7 @@ class DiscourseApiTest extends TestCase {
     */
 	}
 
-
 	/**
-	 * @group userbyusername
 	 * @throws Exception
 	 */
 	function testGetUserByUsername() {
@@ -341,6 +339,22 @@ class DiscourseApiTest extends TestCase {
 
 		$res = $this->DiscourseAPI->getUserByDiscourseId( 3 );
 		var_dump( $res );
+	}
+
+	/**
+	 * @group notificationlevel
+	 * @throws Exception
+	 */
+	function testchangeNotificationLevel() {
+
+		// four months from now
+		$until = new DateTime();
+		$until->setTimestamp( time() + ( 60 * 60 * 24 * 4 * 30 ) );
+
+		$sourceUsername   = 'erictest3';
+		$usernameToIgnore = 'quinten';
+
+		$this->DiscourseAPI->changeNotificationLevel( $sourceUsername, $usernameToIgnore, $until, false );
 	}
 
 	/**
@@ -356,9 +370,10 @@ class DiscourseApiTest extends TestCase {
 		$until->setTimestamp( time() + ( 60 * 60 * 24 * 365 ) );
 		$reason = 'This member has decided to suspend their own account temporarily.';
 
-		$id  = 4;
+		$id = 4;
 
-		$res = $this->DiscourseAPI->suspendUserById( $id, $until, $reason );
+		$res = $this->DiscourseAPI->unsuspendUserById( $id, $until, $reason );
+		//		$res = $this->DiscourseAPI->suspendUserById( $id, $until, $reason );
 		die();
 	}
 
