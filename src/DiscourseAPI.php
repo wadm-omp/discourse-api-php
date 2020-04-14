@@ -269,7 +269,8 @@ class DiscourseAPI {
 			$params['expiring_at'] = substr( $timespan->format( 'c' ), 0, 10 );
 		}
 
-		return $this->_putRequest( '/u/' . $usernameToIgnore . '/notification_level.json', [ $params ], $sourceUsername );
+		return $this->_putRequest( '/u/' . $usernameToIgnore . '/notification_level.json', [ $params ],
+		                           $sourceUsername );
 	}
 
 	/**
@@ -489,7 +490,14 @@ class DiscourseAPI {
 	 * @throws Exception
 	 * @noinspection MoreThanThreeArgumentsInspection
 	 */
-	public function createUser( string $name, string $userName, string $emailAddress, string $password, bool $activate = true, int $external_id = 0 ) {
+	public function createUser(
+		string $name,
+		string $userName,
+		string $emailAddress,
+		string $password,
+		bool $activate = true,
+		int $external_id = 0
+	) {
 
 		// apparently we need to call hp.json to get a challenge string, not sure why, can't find in Discourse docs
 		$obj = $this->_getRequest( '/users/hp.json' );
@@ -554,7 +562,8 @@ class DiscourseAPI {
 	}
 
 	/**
-	 * getUserById (internal ID)
+	 * get discourse user by their internal ID -
+	 * note that this returns FULL record, including single_sign_on_record
 	 *
 	 * @param int $id discourse (non-external) ID
 	 *
@@ -596,18 +605,28 @@ class DiscourseAPI {
 	}
 
 	/**
-	 * getDiscourseUserByExternalID
+	 * get a discourse user reocrd from their external ID - returns the full user record
 	 *
-	 * @param string $externalID external id of sso user
+	 * @param int $externalID external id of sso user
 	 *
 	 * @return mixed HTTP return code and API return object
 	 * @throws Exception
 	 */
-	public function getDiscourseUserFromExternalId( $externalID ) {
+	public function getDiscourseUserFromExternalId( int $externalID ) {
 		$res = $this->_getRequest( "/users/by-external/{$externalID}.json" );
 
-		if ( $res && is_object( $res ) && $res->apiresult->user->id ) {
-			return $res->apiresult->user;
+		if ( $res->http_code == 404 ) {
+			return false;
+		}
+
+		if ( is_object( $res ) && $res->apiresult->user->id ) {
+
+			// now call this to get the FULL record, with single_sign_on_record if there
+			$fullUserRecord = $this->getUserByDiscourseId( $res->apiresult->user->id );
+
+			$r = $fullUserRecord->apiresult;
+
+			return $r;
 		}
 
 		return false;
@@ -919,7 +938,7 @@ class DiscourseAPI {
 		// see https://stackoverflow.com/questions/4007969/application-x-www-form-urlencoded-or-multipart-form-data
 
 		// special flag for upload file!
-		if ( $paramArray['uploadFile'] ) {
+		if ( isset( $paramArray['uploadFile'] ) ) {
 			// we are trying to upload a file, so we prepare the curl POSTFIELDS a little different
 			// see http://code.iamkate.com/php/sending-files-using-curl/
 			$query = [];
