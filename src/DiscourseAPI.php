@@ -249,6 +249,30 @@ class DiscourseAPI {
 	}
 
 	/**
+	 * ignore a user (or unignore a user)
+	 *
+	 * @param          $sourceUsername
+	 * @param          $usernameToIgnore
+	 * @param DateTime $timespan
+	 * @param bool     $ignore
+	 *
+	 * @return stdClass
+	 * @throws Exception
+	 */
+	public function changeNotificationLevel( $sourceUsername, $usernameToIgnore, DateTime $timespan, $ignore = true ) {
+		$params = [
+			'notification_level' => ( $ignore ) ? 'ignore' : 'normal',
+		];
+
+		// if we are ignoring the user, add the time span (up to 4 months)
+		if ( $ignore ) {
+			$params['expiring_at'] = substr( $timespan->format( 'c' ), 0, 10 );
+		}
+
+		return $this->_putRequest( '/u/' . $usernameToIgnore . '/notification_level.json', [ $params ], $sourceUsername );
+	}
+
+	/**
 	 * get info on a single category - by category ID only
 	 *
 	 * @param $categoryId
