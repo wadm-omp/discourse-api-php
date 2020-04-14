@@ -678,7 +678,7 @@ class DiscourseAPI {
 	 * @return stdClass
 	 * @throws Exception
 	 */
-	public function createPost( string $bodyText, int $topicId, string $username, DateTime $createDateTime ): stdClass {
+	public function createPost( string $bodyText, int $topicId, string $username, \DateTime $createDateTime ): stdClass {
 		$params = [
 			'raw'       => $bodyText,
 			'archetype' => 'regular',
