@@ -372,8 +372,7 @@ class DiscourseApiTest extends TestCase {
 
 		$id = 4;
 
-		$res = $this->DiscourseAPI->unsuspendUserById( $id, $until, $reason );
-		//		$res = $this->DiscourseAPI->suspendUserById( $id, $until, $reason );
+		$res = $this->DiscourseAPI->suspendUserById( $id, $until, $reason );
 		die();
 	}
 
@@ -382,9 +381,7 @@ class DiscourseApiTest extends TestCase {
 	 * @throws Exception
 	 */
 	function testUnsuspend() {
-
 		$id = $this->DiscourseAPI->getDiscourseUserIdFromExternalId( 860838 );
-
 
 		$id  = 4;
 		$res = $this->DiscourseAPI->unsuspendUserById( $id );
@@ -393,10 +390,34 @@ class DiscourseApiTest extends TestCase {
 
 
 	/**
+	 * @group customfield
+	 * @throws Exception
+	 */
+	function testSetUserField() {
+		$res = $this->DiscourseAPI->setUserField( 'erictest3', [ 'user_fields[2]' => 1 ] );
+
+		// get user record
+		$res = $this->DiscourseAPI->getUserByUsername( 'erictest3' );
+		$this->assertEquals( $res->apiresult->user->user_fields->{'2'}, 1 );
+
+		// set that field to 0
+		$res = $this->DiscourseAPI->setUserField( 'erictest3', [ 'user_fields[2]' => 0 ] );
+
+		// get user record and check again
+		$res = $this->DiscourseAPI->getUserByUsername( 'erictest3' );
+		$this->assertEquals( $res->apiresult->user->user_fields->{'2'}, 0 );
+	}
+
+
+	/**
 	 * @throws Exception
 	 * @group quicktest
 	 */
 	function testGetCategoriesAgain() {
+
+		$this->DiscourseAPI->setDebugPutPostRequest( true );
+		$this->DiscourseAPI->setDebugGetRequest( true );
+
 		$res = $this->DiscourseAPI->getCategories();
 
 		var_dump( $res );
