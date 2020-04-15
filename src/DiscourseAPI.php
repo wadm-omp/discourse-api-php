@@ -640,31 +640,31 @@ class DiscourseAPI {
 	}
 
 	/**
-	 * get a discourse user reocrd from their external ID - returns the full user record
+	 * get a discourse user reocrd from their external ID - by default returns "full" record (from /admin)
 	 *
-	 * @param int $externalID external id of sso user
+	 * note that NON-ADMIN record includes "ignored_users"
+	 * and the ADMIN version does NOT include "ignored_users" but does include the whole single_sign_on block (external_id)
+	 *
+	 * @param int  $externalID external id of sso user
+	 *
+	 * @param bool $getFullAdminRecord
 	 *
 	 * @return mixed HTTP return code and API return object
 	 * @throws Exception
 	 */
-	public function getDiscourseUserFromExternalId( int $externalID ) {
+	public function getDiscourseUserFromExternalId( int $externalID, bool $getFullAdminRecord = true ) {
 		$res = $this->_getRequest( "/users/by-external/{$externalID}.json" );
 
 		if ( $res->http_code == 404 ) {
 			return false;
 		}
 
-		if ( is_object( $res ) && $res->apiresult->user->id ) {
-
-			// now call this to get the FULL record, with single_sign_on_record if there
-			$fullUserRecord = $this->getUserByDiscourseId( $res->apiresult->user->id );
-
-			$r = $fullUserRecord->apiresult;
-
-			return $r;
+		if ( $getFullAdminRecord && is_object( $res ) && $res->apiresult->user->id ) {
+			// now call this to get the FULL record, with single_sign_on_record if there, but this drops ignored_users
+			$res = $this->getUserByDiscourseId( $res->apiresult->user->id );
 		}
 
-		return false;
+		return $res->apiresult;
 	}
 
 	/**

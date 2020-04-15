@@ -272,7 +272,7 @@ class DiscourseApiTest extends TestCase {
 
 	/**
 	 *
-	 * @group users
+	 * @group sso
 	 */
 	public function testSyncSso() {
 		$this->DiscourseAPI->setSsoSecret( $this->ssoSecret );
@@ -298,9 +298,11 @@ class DiscourseApiTest extends TestCase {
 		//			//var_dump( $res->apiresult->single_sign_on_record );
 		//		}
 
-		$res = $this->DiscourseAPI->getDiscourseUserFromExternalId( $res->apiresult->single_sign_on_record->external_id );
+		$res = $this->DiscourseAPI->getDiscourseUserFromExternalId(
+			$res->apiresult->single_sign_on_record->external_id,
+			false );
 
-		var_dump( $res );
+		var_dump( $res->apiresult->user );
 		/*
 		 $res->apiresult->single_sign_on_record =
 			object(stdClass)#16 (11) {
@@ -453,14 +455,26 @@ class DiscourseApiTest extends TestCase {
 	 * @group   trustlevel
 	 */
 	function testGetUserTrustLevel() {
-
 		$res         = $this->DiscourseAPI->getUserByUsername( 'kickinitla' );
 		$discourseId = $res->apiresult->user->id;
-
 
 		$this->assertEquals( 2, $this->DiscourseAPI->getUserTrustLevel( $discourseId ), 'Expected trust level 2' );
 	}
 
+
+	/**
+	 * @throws Exception
+	 * @group extid
+	 */
+	function testGetUserByExtId() {
+		$extId = 1310598;
+
+		$res = $this->DiscourseAPI->getDiscourseUserFromExternalId(
+			$extId,
+			false );
+
+		var_dump( $res->user );
+	}
 
 	// TODO: write lots more tests ;-)
 }
