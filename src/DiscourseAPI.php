@@ -249,7 +249,7 @@ class DiscourseAPI {
 	}
 
 	/**
-	 * ignore a user (or unignore a user)
+	 * ignore/unignore a user
 	 *
 	 * @param          $sourceUsername
 	 * @param          $usernameToIgnore
@@ -410,6 +410,42 @@ class DiscourseAPI {
 
 
 	/**
+	 * update trust level
+	 *
+	 * @param int $discourseUserId
+	 * @param int $trustLevel
+	 *
+	 * @return stdClass
+	 * @throws Exception
+	 */
+	public function setUserTrustLevel( int $discourseUserId, int $trustLevel ) {
+		$params['level'] = $trustLevel;
+
+		return $this->_putRequest( '/admin/users/' . $discourseUserId . '/trust_level', [ $params ] );
+	}
+
+	/**
+	 * get user trust level
+	 *
+	 * @param int $discourseUserId
+	 * @param int $trustLevel
+	 *
+	 * @return int|null trust level, or null if we couldn't get it
+	 * @throws Exception
+	 */
+	public function getUserTrustLevel( int $discourseUserId ) {
+		$res = $this->getUserByDiscourseId( $discourseUserId );
+
+		$tl = null;
+
+		if ( is_object( $res ) && $res->http_code == 200 ) {
+			$tl = $res->apiresult->trust_level;
+		}
+
+		return $tl;
+	}
+
+	/**
 	 * log out user - by username
 	 *
 	 * @param string $userName username of new user
@@ -553,7 +589,7 @@ class DiscourseAPI {
 	 *
 	 * @param string $userName username of user
 	 *
-	 * @return mixed HTTP return code and API return object
+	 * @return mixed full HTTP return code and API return object
 	 * @throws Exception
 	 */
 	public function getUserByUsername( $userName ) {

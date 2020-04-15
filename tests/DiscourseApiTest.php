@@ -429,5 +429,38 @@ class DiscourseApiTest extends TestCase {
 	}
 
 
+	/**
+	 * @throws Exception
+	 * @group trustlevel
+	 */
+	function testSetUserTrustLevel() {
+
+		$res         = $this->DiscourseAPI->getUserByUsername( 'kickinitla' );
+		$discourseId = $res->apiresult->user->id;
+
+		$this->DiscourseAPI->setUserTrustLevel( $discourseId, 2 );
+
+		// now check it
+		$res = $this->DiscourseAPI->getUserByUsername( 'kickinitla' );
+
+		$this->assertEquals( 2, $res->apiresult->user->trust_level, 'Expected trust level 2' );
+	}
+
+
+	/**
+	 * @throws Exception
+	 * @depends testSetUserTrustLevel
+	 * @group   trustlevel
+	 */
+	function testGetUserTrustLevel() {
+
+		$res         = $this->DiscourseAPI->getUserByUsername( 'kickinitla' );
+		$discourseId = $res->apiresult->user->id;
+
+
+		$this->assertEquals( 2, $this->DiscourseAPI->getUserTrustLevel( $discourseId ), 'Expected trust level 2' );
+	}
+
+
 	// TODO: write lots more tests ;-)
 }
