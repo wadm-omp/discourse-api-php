@@ -1291,4 +1291,16 @@ class DiscourseAPI {
 		return $this->_putRequest( '/users/' . $username, [ $params ] );
 	}
 
+	/**
+	 * anonymize a Discourse account... this is basically the same as deleting the user...
+	 * it PERMANENTLY scrambles the username etc.... there is NO UNDO!
+	 *
+	 * @param int $discourseId
+	 *
+	 * @return stdClass
+	 * @throws Exception
+	 */
+	public function anonymizeAccount( int $discourseId ) {
+		$res = $this->_putRequest( '/admin/users/' . $discourseId . '/anonymize', [] );
+	}
 }

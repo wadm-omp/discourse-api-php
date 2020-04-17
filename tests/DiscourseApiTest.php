@@ -494,9 +494,17 @@ class DiscourseApiTest extends TestCase {
 
 		$r = $this->DiscourseAPI->setAvatar( $username, $userid, $fullPath, $mime, $name );
 		var_dump( $r );
+	}
 
+	/**
+	 * @group deleteuser
+	 * @throws Exception
+	 */
+	function testZapAccount() {
+		die();
+		$res = $this->DiscourseAPI->anonymizeAccount( 4 );
+		var_dump( $res );
 	}
 
 	// TODO: write lots more tests ;-)
 }
-
