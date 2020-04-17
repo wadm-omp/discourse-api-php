@@ -476,5 +476,27 @@ class DiscourseApiTest extends TestCase {
 		var_dump( $res->user );
 	}
 
+
+	/**
+	 * @group avatar
+	 */
+	function testSetAvatar() {
+
+		$contents = file_get_contents( './judgingcat.jpg' );
+
+		$username = 'erictest3';
+		$userid   = 4;
+
+
+		$fullPath = './judgingcat.jpg';
+		$mime     = 'image/jpeg';
+		$name     = 'judging cat.jpg';
+
+		$r = $this->DiscourseAPI->setAvatar( $username, $userid, $fullPath, $mime, $name );
+		var_dump( $r );
+
+	}
+
 	// TODO: write lots more tests ;-)
 }
+

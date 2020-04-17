@@ -977,6 +977,7 @@ class DiscourseAPI {
 			// we are trying to upload a file, so we prepare the curl POSTFIELDS a little different
 			// see http://code.iamkate.com/php/sending-files-using-curl/
 			$query = [];
+			unset( $paramArray['uploadFile'] );
 			foreach ( $paramArray as $k => $v ) {
 				$query[ $k ] = $v;
 			}
@@ -1019,13 +1020,14 @@ class DiscourseAPI {
 		curl_setopt( $ch, CURLOPT_RETURNTRANSFER, 1 );
 		curl_setopt( $ch, CURLOPT_CUSTOMREQUEST, $httpMethod );
 
-		// curl_setopt( $ch, CURLOPT_VERBOSE, 1 );
+		//		 curl_setopt( $ch, CURLOPT_VERBOSE, 1 );
 
 		// make the call and get the results
 		$body = curl_exec( $ch );
-		$rc   = curl_getinfo( $ch, CURLINFO_HTTP_CODE );
 
+		$rc = curl_getinfo( $ch, CURLINFO_HTTP_CODE );
 		curl_close( $ch );
+
 
 		$resObj            = new stdClass();
 		$json              = json_decode( $body );
@@ -1209,6 +1211,74 @@ class DiscourseAPI {
 		$this->debugGetRequest = $debugGetRequest;
 	}
 
+	/**
+	 * set a user's avatar
+	 * note that this does NOT work if your site sends the avatar as part of SSO
+	 *
+	 * @param string $discourseUsername
+	 * @param int    $discourseUserId
+	 * @param string $fullPath     full path so we can load the file contents
+	 * @param string $mimeFileType like 'image/jpeg'
+	 * @param string $filename     the filename that shows on the site
+	 *
+	 * @return stdClass
+	 * @throws Exception
+	 */
+	public function setAvatar( string $discourseUsername, int $discourseUserId, string $fullPath, string $mimeFileType, string $filename ) {
+		// see https://meta.discourse.org/t/upload-avatar-image-with-api/55253/7
+
+		/*
+		 * POST {{base_url}}/uploads.json
+			form-data:
+			  api_key: {{api_key}}
+			  api_username: {{api_username}}
+			  type: avatar
+			  user_id: 1
+			  files[]: file
+		 */
+
+		// see https://www.php.net/manual/en/class.curlfile.php
+		$CURLFile       = new \CURLFile( $fullPath, $mimeFileType, $filename ); // try adding
+		$CURLFile->type = 'avatar';
+
+		$params = [
+			'type'        => 'avatar',
+			'user_id'     => $discourseUserId,
+			'files[]'     => $CURLFile,
+			'synchronous' => 'true',
+			'uploadFile'  => true,
+		];
+
+		//		$this->setDebugPutPostRequest( false );
+
+		// first we have to upload the file itself
+		$res = $this->_postRequest( '/uploads.json', $params );
+
+		//		$this->setDebugPutPostRequest( true );
+
+		// did it upload successfully?
+		if ( $res->apiresult->id ) {
+
+			/*
+			 PUT {{base_url}}/users/{{api_username}}/preferences/avatar/pick
+				form-data:
+				  api_key: {{api_key}}
+				  api_username: {{api_username}}
+				  upload_id: 2
+				  type: uploaded
+			 */
+
+			// yes-- attach it to the user
+			$params = [
+				'type'      => 'uploaded',
+				'upload_id' => $res->apiresult->id,
+			];
+
+			$res = $this->_putRequest( '/users/' . $discourseUsername . '/preferences/avatar/pick', [ $params ] );
+		}
+
+		return $res;
+	}
 
 	/**
 	 * @param $username
