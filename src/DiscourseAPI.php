@@ -1302,5 +1302,46 @@ class DiscourseAPI {
 	 */
 	public function anonymizeAccount( int $discourseId ) {
 		$res = $this->_putRequest( '/admin/users/' . $discourseId . '/anonymize', [] );
+
+		return $res;
+	}
+
+	/**
+	 * get the latest topics posted (i.e. most recent activity)
+	 *
+	 * @return array Discourse "topic" objects
+	 */
+	public function getLatestTopics(): array {
+		$res = $this->_getRequest( '/latest.json', [] );
+
+		if ( ! $res ) {
+			$res = [];
+		} else {
+			$res= $res->apiresult->topic_list->topics;
+		}
+
+		return $res;
+	}
+
+	/**
+	 * get the "hot" topics (busy topics) - default this year
+	 *
+	 * @param string $period optional; can be: all, yearly, quarterly, monthly, weekly, daily
+	 *
+	 * @return array Discourse "topic" objects
+	 * @throws Exception
+	 */
+	public function getTopTopics( string $period = 'yearly' ): array {
+		$res = $this->_getRequest( '/top/' . $period . '.json', [] );
+
+		if ( ! $res ) {
+			$res = [];
+		} else {
+			$res = $res->apiresult->topic_list->topics;
+		}
+
+		return $res;
 	}
 }
+
+

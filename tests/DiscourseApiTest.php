@@ -506,5 +506,28 @@ class DiscourseApiTest extends TestCase {
 		var_dump( $res );
 	}
 
+	/**
+	 * @group topicget
+	 * @throws Exception
+	 */
+	function testGettingTopTopics() {
+		$res = $this->DiscourseAPI->getTopTopics();
+		$this->assertIsArray( $res );
+		$res = $this->DiscourseAPI->getTopTopics( 'all' );
+		$this->assertIsArray( $res );
+		$res = $this->DiscourseAPI->getTopTopics( 'weekly' );
+		$this->assertIsArray( $res );
+		var_dump( $res );
+	}
+
+	/**
+	 *
+	 * @group topicget
+	 * er     */
+	function testGettingLatestTopics() {
+		$res = $this->DiscourseAPI->getLatestTopics();
+		$this->assertIsArray( $res );
+	}
+
 	// TODO: write lots more tests ;-)
 }
