@@ -517,6 +517,9 @@ class DiscourseApiTest extends TestCase {
 		$this->assertIsArray( $res );
 		$res = $this->DiscourseAPI->getTopTopics( 'weekly' );
 		$this->assertIsArray( $res );
+
+		$res = $this->DiscourseAPI->getTopTopics( 'weekly', 'erictest3' );
+		$this->assertIsArray( $res );
 		var_dump( $res );
 	}
 
@@ -527,6 +530,11 @@ class DiscourseApiTest extends TestCase {
 	function testGettingLatestTopics() {
 		$res = $this->DiscourseAPI->getLatestTopics();
 		$this->assertIsArray( $res );
+
+		$res = $this->DiscourseAPI->getLatestTopics( 'erictest3' );
+		$this->assertIsArray( $res );
+		var_dump( $res );
+
 	}
 
 	// TODO: write lots more tests ;-)

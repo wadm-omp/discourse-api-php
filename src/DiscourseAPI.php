@@ -1309,15 +1309,18 @@ class DiscourseAPI {
 	/**
 	 * get the latest topics posted (i.e. most recent activity)
 	 *
+	 * @param string $username optional - discourse username to impersonate
+	 *
 	 * @return array Discourse "topic" objects
+	 * @throws Exception
 	 */
-	public function getLatestTopics(): array {
-		$res = $this->_getRequest( '/latest.json', [] );
+	public function getLatestTopics( $username = 'system' ): array {
+		$res = $this->_getRequest( '/latest.json', [], $username );
 
 		if ( ! $res ) {
 			$res = [];
 		} else {
-			$res= $res->apiresult->topic_list->topics;
+			$res = $res->apiresult->topic_list->topics;
 		}
 
 		return $res;
@@ -1326,13 +1329,14 @@ class DiscourseAPI {
 	/**
 	 * get the "hot" topics (busy topics) - default this year
 	 *
-	 * @param string $period optional; can be: all, yearly, quarterly, monthly, weekly, daily
+	 * @param string $period   optional; can be: all, yearly, quarterly, monthly, weekly, daily
+	 * @param string $username optional - discourse username to impersonate
 	 *
 	 * @return array Discourse "topic" objects
 	 * @throws Exception
 	 */
-	public function getTopTopics( string $period = 'yearly' ): array {
-		$res = $this->_getRequest( '/top/' . $period . '.json', [] );
+	public function getTopTopics( string $period = 'yearly', string $username = 'system' ): array {
+		$res = $this->_getRequest( '/top/' . $period . '.json', [], $username );
 
 		if ( ! $res ) {
 			$res = [];
