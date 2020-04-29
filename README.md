@@ -27,17 +27,21 @@ Many methods added and major refactor by Eric Mueller March/April 2020, now live
 
 # How to Use
 
-Just include it with Composer, and then:
+Just include it with Composer:
+ `composer require pnoeric/discourse-api-php`
+
+And then:
 
 ```PHP
-$hostname = 'forums.example.com';
-
-// set this up in Discourse first
+// set up key in Discourse first - recommend system key for all users
 $key = 'my-secret-discourse-api-key';
+$hostname = 'forums.example.com';
 
 $api = new \pnoeric\DiscourseAPI($hostname, $key);
 
 // and you're off and running!
+// look through the src/DiscourseAPI.php file for methods
+// for example:
 $api->getTopTopics();
 
 // if you aren't sure what the API results, just look at it:
