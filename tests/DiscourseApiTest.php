@@ -1,7 +1,15 @@
 <?php
+/**
+ * Test suite for DiscourseAPI.php
+ *
+ * These tests are not great - would love for someone to clean them up and make them better.
+ * For now, they're a quick way to test some methods, and to dump output to the screen.
+ *
+ * @author Eric Mueller, https://github.com/pnoeric
+ */
 
-use pnoeric\discourseAPI\DiscourseAPI;
 use PHPUnit\Framework\TestCase;
+use pnoeric\DiscourseAPI;
 
 class DiscourseApiTest extends TestCase {
 	/**
@@ -9,12 +17,20 @@ class DiscourseApiTest extends TestCase {
 	 */
 	private $DiscourseAPI;
 
-	private $testUserName;
-
-	private $testCategory;
-	private $testTopic;
+	/*
+	 * all following vars come directly from .env file
+	 */
+	private $testAdminUsername;
+	private $testAdminUserId;
+	private $testRegularUsername;
+	private $testRegularUserId;
+	private $testRegularExternalId;
 	private $ssoSecret;
 
+	/**
+	 * @var string path to test JPG file
+	 */
+	private $testJpegPath;
 
 	protected function setUp() {
 		// load environment vars from .env file
@@ -24,34 +40,47 @@ class DiscourseApiTest extends TestCase {
 
 		// that's it! all the environment vars are loaded into $_ENV now, we don't need $dotEnv any longer.
 
-		$this->DiscourseAPI = new DiscourseAPI( $_ENV['DISCOURSE_URL'], $_ENV['DISCOURSE_API_KEY'],
-		                                        $_ENV['DISCOURSE_PROTOCOL'] );
+		$this->DiscourseAPI = new \pnoeric\DiscourseAPI( $_ENV['DISCOURSE_URL'], $_ENV['DISCOURSE_API_KEY'],
+		                                                 $_ENV['DISCOURSE_PROTOCOL'] );
 
-		$this->testUserName = $_ENV['DISCOURSE_TEST_USERNAME'];
+		$propertiesFromEnv = [
+			'testAdminUsername'         => 'DISCOURSE_ADMIN_USER_NAME',
+			'testAdminUserId'           => 'DISCOURSE_ADMIN_USER_ID',
+			'testRegularUsername'       => 'DISCOURSE_REGULAR_USER_NAME',
+			'testRegularUserId'         => 'DISCOURSE_REGULAR_USER_ID',
+			'testRegularUserExternalId' => 'DISCOURSE_REGULAR_USER_EXTERNAL_ID',
+			'ssoSecret'                 => 'DISCOURSE_SSO_SECRET',
+		];
 
-		$this->ssoSecret = $_ENV['DISCOURSE_SSO_SECRET'];
+		// pull variables from $_ENV and load them as properties here
+		foreach ( $propertiesFromEnv as $k => $v ) {
+			$this->$k = $_ENV[ $v ];
+		}
+
+		// set up the path to our test JPEG file
+		$this->testJpegPath = __DIR__ . '/assets/judgingcat.jpg';
 
 		// this dumps lots of stuff to the screen when set to true
-		$this->DiscourseAPI->setDebugPutPostRequest( true );
+		//		$this->DiscourseAPI->setDebugPutPostRequest( true );
+		//		$this->DiscourseAPI->setDebugGetRequest( true );
 	}
 
 	/**
 	 * test the getCategories() call. assumes your Discourse installation has at least one category!
 	 *
 	 * @group topics
+	 * @throws Exception
 	 */
 	public function testGetCategories() {
 		$res = $this->DiscourseAPI->getCategories();
 
 		// first let's be sure we got an object back!
-		$this->assertIsObject( $res );
 		$this->assertIsObject( $res->apiresult );
-
-		// then let's be sure we got a valid result
 		$this->assertEquals( 200, $res->http_code );
 
 		// then let's be sure there is at least one category
-		$this->assertGreaterThan( 0, sizeof( $res->apiresult->category_list->categories ),
+		$this->assertGreaterThan( 0,
+		                          sizeof( $res->apiresult->category_list->categories ),
 		                          'Expected there to be at least one category' );
 
 	}
@@ -63,6 +92,7 @@ class DiscourseApiTest extends TestCase {
 	 * @depends testGetCategories
 	 *
 	 * @group   topics
+	 * @throws Exception
 	 */
 	public function testGetCategory() {
 		// first get all categories
@@ -91,7 +121,6 @@ class DiscourseApiTest extends TestCase {
 		$this->assertIsObject( $catInfo->apiresult );
 		$this->assertIsArray( $catInfo->apiresult->users, "Can't retrieve array of users from getCategory()" );
 		$this->assertIsArray( $catInfo->apiresult->topic_list->topics, "Can't retrieve array of topics from getCategory()" );
-
 	}
 
 	/**
@@ -131,6 +160,7 @@ class DiscourseApiTest extends TestCase {
 	 * @depends testGetCategories
 	 * @depends testGetCategory
 	 * @depends testGetTopic
+	 * @throws Exception
 	 */
 
 	public function testCreateTopic() {
@@ -158,6 +188,7 @@ class DiscourseApiTest extends TestCase {
 	 * @depends testGetCategory
 	 * @depends testGetTopic
 	 * @depends testCreateTopic
+	 * @throws Exception
 	 */
 	public function testCreatePost() {
 		// first get all categories
@@ -185,23 +216,22 @@ class DiscourseApiTest extends TestCase {
 
 		$res = $this->DiscourseAPI->createPost( $bodyText2, $topicResult->apiresult->topic_id, 'max001', $dt );
 
-		var_dump( $res );
-
+		//var_dump( $res );
+		// add tests here to confirm the results are okay
 	}
 
-
 	/**
+	 * test uploading of image
+	 *
 	 * @throws Exception
 	 * @group upload
 	 */
-
 	public function testUploadImage() {
-		$fullPath = __DIR__ . '/judgingcat.jpg';
+		// first let's just be sure we set up the test correctly ;-)
+		$this->assertFileExists( $this->testJpegPath );
 
-		$this->DiscourseAPI->setDebugPutPostRequest( true );
-
-		$res = $this->DiscourseAPI->uploadImage( $fullPath, 'judging cat', 'image/jpeg' );
-		var_dump( $res );
+		// now upload the test image
+		$res = $this->DiscourseAPI->uploadImage( $this->testJpegPath, 'judging cat', 'image/jpeg' );
 
 		// first let's be sure we got an object back!
 		$this->assertIsObject( $res );
@@ -211,19 +241,17 @@ class DiscourseApiTest extends TestCase {
 		$this->assertEquals( 200, $res->http_code );
 
 		$this->assertIsString( $res->apiresult->url );
-
 	}
 
-
 	/**
-	 * get dummy text from randomtext.me service
+	 * get dummy text from randomtext.me service, used internally only
 	 *
-	 * @param $grafCount
+	 * @param $paragraphCount
 	 *
 	 * @return string
 	 */
-	private function getDummyPargraphs( $grafCount ) {
-		$url = 'https://www.randomtext.me/api/gibberish/p-' . $grafCount . '/2-10';
+	private function getDummyPargraphs( $paragraphCount ) {
+		$url = 'https://www.randomtext.me/api/gibberish/p-' . $paragraphCount . '/2-10';
 
 		do {
 			$jsonData = @file_get_contents( $url );
@@ -238,20 +266,19 @@ class DiscourseApiTest extends TestCase {
 
 		$dummyText = (string) $obj->text_out;
 
-		// change into plaintext
+		// strip HTML <p> tags and change to CRs
 		$dummyText = str_replace( [ '<p>', "\r" ], "", $dummyText );
 		$dummyText = str_replace( '</p>', "\n\n", $dummyText );
 
 		return trim( $dummyText );
 	}
 
-
 	/**
 	 * test create user, and set user info
 	 */
 	public function testCreateUser() {
-		$userName     = $realName = 'erictest' . mt_rand( 10, 999 );
-		$emailAddress = 'eric+' . $userName . '@ericmueller.org';
+		$userName     = $realName = 'test-user-' . mt_rand( 10, 999 );
+		$emailAddress = 'test+' . $userName . '@example.com';
 		$password     = 'password' . mt_rand( 1000, 9999 );
 
 		$res = $this->DiscourseAPI->createUser( $realName, $userName, $emailAddress, $password );
@@ -266,12 +293,11 @@ class DiscourseApiTest extends TestCase {
 		// then let's be sure we got a valid result
 		$this->assertEquals( 200, $res->http_code );
 
+		// write more tests here to confirm output
 		// var_dump( $r );
 	}
 
-
 	/**
-	 *
 	 * @group sso
 	 */
 	public function testSyncSso() {
@@ -280,7 +306,7 @@ class DiscourseApiTest extends TestCase {
 		$externalId = mt_rand( 1000, 9999 );
 
 		$userName     = $realName = 'test-user-' . $externalId;
-		$emailAddress = 'eric+' . $userName . '@ericmueller.org';
+		$emailAddress = 'test+' . $userName . '@example.com';
 
 		$otherParams = [
 			'require_activation' => 'false',
@@ -289,7 +315,7 @@ class DiscourseApiTest extends TestCase {
 
 		$res = $this->DiscourseAPI->syncSso( $emailAddress, $userName, $otherParams );
 
-		var_dump( $res );
+		// var_dump( $res );
 
 		// then let's be sure we got a valid result
 		$this->assertEquals( 200, $res->http_code );
@@ -302,7 +328,11 @@ class DiscourseApiTest extends TestCase {
 			$res->apiresult->single_sign_on_record->external_id,
 			false );
 
-		var_dump( $res->apiresult->user );
+		// spot check a few fields
+		$this->assertIsInt( $res->apiresult->user->user_id );
+		$this->assertIsString( $res->apiresult->user->external_email );
+
+		// var_dump( $res->apiresult->user );
 		/*
 		 $res->apiresult->single_sign_on_record =
 			object(stdClass)#16 (11) {
@@ -334,29 +364,55 @@ class DiscourseApiTest extends TestCase {
 
 	/**
 	 * @throws Exception
+	 * @group lacksAssertions
 	 */
 	function testGetUserByUsername() {
+		// $this->DiscourseAPI->setDebugGetRequest( true );
 
-		$this->DiscourseAPI->setDebugGetRequest( true );
+		$res = $this->DiscourseAPI->getUserByDiscourseId( $this->testAdminUserId );
 
-		$res = $this->DiscourseAPI->getUserByDiscourseId( 3 );
-		var_dump( $res );
+		$this->assertIsObject( $res->apiresult );
+		$this->assertEquals( 200, $res->http_code );
+
+		$this->assertEquals( $this->testAdminUsername, $res->apiresult->user->username );
+
+		//var_dump( $res );
 	}
 
 	/**
-	 * @group notificationlevel
+	 * @group lacksAssertions
 	 * @throws Exception
 	 */
-	function testchangeNotificationLevel() {
+	function testUserIgnore() {
+		$sourceUsername   = $this->testAdminUsername;
+		$usernameToIgnore = $this->testRegularUsername;
 
 		// four months from now
 		$until = new DateTime();
 		$until->setTimestamp( time() + ( 60 * 60 * 24 * 4 * 30 ) );
 
-		$sourceUsername   = 'erictest3';
-		$usernameToIgnore = 'quinten';
+		$this->DiscourseAPI->ignoreUnignoreUser(
+			$sourceUsername,
+			$usernameToIgnore,
+			$until,
+			false );
+	}
 
-		$this->DiscourseAPI->changeNotificationLevel( $sourceUsername, $usernameToIgnore, $until, false );
+	/**
+	 * test getting disocurse user ID from external ID
+	 *
+	 * @group sso
+	 * @throws Exception
+	 */
+	public function testGetDiscourseUserIdFromExternalId() {
+		if ( ! $this->testRegularExternalId ) {
+			$this->markTestSkipped( "Missing DISCOURSE_REGULAR_USER_EXTERNAL_ID in .env file" );
+		}
+
+		$getId = $this->DiscourseAPI->getDiscourseUserIdFromExternalId( $this->testRegularExternalId );
+
+		// be sure the ID we got is the discourse ID for this external ID
+		$this->assertEquals( $this->testAdminUserId, $getId );
 	}
 
 	/**
@@ -364,90 +420,77 @@ class DiscourseApiTest extends TestCase {
 	 * @throws Exception
 	 */
 	function testSuspend() {
-
-		$id = $this->DiscourseAPI->getDiscourseUserIdFromExternalId( 860838 );
-
 		// one year from now
 		$until = new DateTime();
 		$until->setTimestamp( time() + ( 60 * 60 * 24 * 365 ) );
-		$reason = 'This member has decided to suspend their own account temporarily.';
+		$reason = 'This member account is suspended.';
 
-		$id = 4;
+		$res = $this->DiscourseAPI->suspendUserById( $this->testRegularUserId, $until, $reason );
 
-		$res = $this->DiscourseAPI->suspendUserById( $id, $until, $reason );
-		die();
+		$this->assertIsObject( $res->apiresult );
+		$this->assertEquals( 200, $res->http_code );
+
+		// needs better assertions!
 	}
 
 	/**
+	 * test unsuspendUserById()
+	 *
 	 * @group unsuspend
 	 * @throws Exception
 	 */
 	function testUnsuspend() {
-		$id = $this->DiscourseAPI->getDiscourseUserIdFromExternalId( 860838 );
+		$res = $this->DiscourseAPI->unsuspendUserById( $this->testRegularUserId );
 
-		$id  = 4;
-		$res = $this->DiscourseAPI->unsuspendUserById( $id );
-		die();
+		$this->assertIsObject( $res->apiresult );
+		$this->assertEquals( 200, $res->http_code );
+
+		// needs better assertions!
 	}
-
 
 	/**
 	 * @group customfield
 	 * @throws Exception
 	 */
 	function testSetUserField() {
-		$res = $this->DiscourseAPI->setUserField( 'erictest3', [ 'user_fields[2]' => 1 ] );
+		// which user field can we mess with? needs to be set up in discourse first
+		// $testFieldId = 2;
 
-		// get user record
-		$res = $this->DiscourseAPI->getUserByUsername( 'erictest3' );
-		$this->assertEquals( $res->apiresult->user->user_fields->{'2'}, 1 );
-
-		// set that field to 0
-		$res = $this->DiscourseAPI->setUserField( 'erictest3', [ 'user_fields[2]' => 0 ] );
-
-		// get user record and check again
-		$res = $this->DiscourseAPI->getUserByUsername( 'erictest3' );
-		$this->assertEquals( $res->apiresult->user->user_fields->{'2'}, 0 );
-	}
-
-
-	/**
-	 * @throws Exception
-	 * @group quicktest
-	 */
-	function testGetCategoriesAgain() {
-
-		$this->DiscourseAPI->setDebugPutPostRequest( true );
-		$this->DiscourseAPI->setDebugGetRequest( true );
-
-		$res = $this->DiscourseAPI->getCategories();
-
-		var_dump( $res );
-
-		foreach ( $res->apiresult->category_list->categories as $k ) {
-			echo $k->id . ' - ' . $k->name . "\n";
+		if ( ! $testFieldId ) {
+			$this->markTestSkipped( 'Missing user field ID, skipping test' );
 		}
 
-	}
+		$res = $this->DiscourseAPI->setUserField( $this->testAdminUsername, [ 'user_fields[' . $testFieldId . ']' => 1234 ] );
 
+		// get user record
+		$res = $this->DiscourseAPI->getUserByUsername( $this->testAdminUsername );
+		$this->assertEquals( 1234, $res->apiresult->user->user_fields->{$testFieldId} );
+
+		// set that user field to 0
+		$res = $this->DiscourseAPI->setUserField( $this->testAdminUsername, [ 'user_fields[' . $testFieldId . ']' => 0 ] );
+
+		// get user record and check again
+		$res = $this->DiscourseAPI->getUserByUsername( $this->testAdminUsername );
+		$this->assertEquals( 0, $res->apiresult->user->user_fields->{' . $testFieldId . '} );
+	}
 
 	/**
 	 * @throws Exception
 	 * @group trustlevel
 	 */
 	function testSetUserTrustLevel() {
-
-		$res         = $this->DiscourseAPI->getUserByUsername( 'kickinitla' );
-		$discourseId = $res->apiresult->user->id;
+		$res         = $this->DiscourseAPI->getUserByUsername( $this->testRegularUsername );
+		$discourseId = (int) $res->apiresult->user->id;
 
 		$this->DiscourseAPI->setUserTrustLevel( $discourseId, 2 );
 
 		// now check it
-		$res = $this->DiscourseAPI->getUserByUsername( 'kickinitla' );
+		$res = $this->DiscourseAPI->getUserByUsername( $this->testRegularUsername );
 
-		$this->assertEquals( 2, $res->apiresult->user->trust_level, 'Expected trust level 2' );
+		$this->assertEquals( 2,
+		                     $res->apiresult->user->trust_level,
+		                     'Expected trust level 2' );
 	}
-
 
 	/**
 	 * @throws Exception
@@ -455,59 +498,70 @@ class DiscourseApiTest extends TestCase {
 	 * @group   trustlevel
 	 */
 	function testGetUserTrustLevel() {
-		$res         = $this->DiscourseAPI->getUserByUsername( 'kickinitla' );
+		$res         = $this->DiscourseAPI->getUserByUsername( $this->testAdminUsername );
 		$discourseId = $res->apiresult->user->id;
 
-		$this->assertEquals( 2, $this->DiscourseAPI->getUserTrustLevel( $discourseId ), 'Expected trust level 2' );
+		$this->assertEquals( 2,
+		                     $this->DiscourseAPI->getUserTrustLevel( $discourseId ),
+		                     'Expected trust level 2' );
 	}
-
 
 	/**
 	 * @throws Exception
-	 * @group extid
+	 * @group sso
 	 */
 	function testGetUserByExtId() {
-		$extId = 1310598;
-
 		$res = $this->DiscourseAPI->getDiscourseUserFromExternalId(
-			$extId,
+			$this->testRegularUserExternalId,
 			false );
 
-		var_dump( $res->user );
-	}
+		$this->assertIsObject( $res->apiresult );
+		$this->assertEquals( 200, $res->http_code );
+		$this->assertEquals( $this->testRegularUserId, $res->apiresult->user->id );
 
+		// needs better assertions!
+	}
 
 	/**
 	 * @group avatar
+	 * @group lacksAssertions
+	 * @throws Exception
 	 */
 	function testSetAvatar() {
-
-		$contents = file_get_contents( './judgingcat.jpg' );
-
-		$username = 'erictest3';
-		$userid   = 4;
-
-
-		$fullPath = './judgingcat.jpg';
 		$mime     = 'image/jpeg';
-		$name     = 'judging cat.jpg';
+		$filename = 'Judging Cat.jpg';
 
-		$r = $this->DiscourseAPI->setAvatar( $username, $userid, $fullPath, $mime, $name );
-		var_dump( $r );
+		$r = $this->DiscourseAPI->setAvatar(
+			$this->testAdminUsername,
+			$this->testAdminUserId,
+			$this->testJpegPath,
+			$mime,
+			$filename
+		);
+
+		// var_dump( $r );
 	}
 
 	/**
 	 * @group deleteuser
 	 * @throws Exception
 	 */
-	function testZapAccount() {
-		die();
-		$res = $this->DiscourseAPI->anonymizeAccount( 4 );
-		var_dump( $res );
+	function testDeleteUser() {
+		$this->markTestSkipped( 'This test deletes a Discourse user account; please manually enable it in the test suite' );
+
+		// this test is commented out because it WILL erase an account permanently!
+		// to test, I recommend setting up the user account to erase, then uncomment the test
+		// and run JUST this test (or just this group)
+
+		// $discourseUserIdToDelete = 4;
+		// $res = $this->DiscourseAPI->anonymizeAccount( $discourseUserIdToDelete );
+		// var_dump( $res );
 	}
 
 	/**
-	 * @group topicget
+	 * test getting the "top topics" from Discourse API
+	 *
+	 * @group toptopics
 	 * @throws Exception
 	 */
 	function testGettingTopTopics() {
@@ -518,24 +572,24 @@ class DiscourseApiTest extends TestCase {
 		$res = $this->DiscourseAPI->getTopTopics( 'weekly' );
 		$this->assertIsArray( $res );
 
-		$res = $this->DiscourseAPI->getTopTopics( 'weekly', 'erictest3' );
+		// now do the same test but get them as a specific user
+		$res = $this->DiscourseAPI->getTopTopics( 'weekly', $this->testAdminUsername );
 		$this->assertIsArray( $res );
-		var_dump( $res );
+
+		// var_dump( $res );
 	}
 
 	/**
 	 *
-	 * @group topicget
-	 * er     */
+	 * @group topics
+	 */
 	function testGettingLatestTopics() {
 		$res = $this->DiscourseAPI->getLatestTopics();
 		$this->assertIsArray( $res );
 
-		$res = $this->DiscourseAPI->getLatestTopics( 'erictest3' );
+		$res = $this->DiscourseAPI->getLatestTopics( $this->testAdminUsername );
 		$this->assertIsArray( $res );
-		var_dump( $res );
 
+		// var_dump( $res );
 	}
-
-	// TODO: write lots more tests ;-)
 }

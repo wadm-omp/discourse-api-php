@@ -1,7 +1,8 @@
 {
   "name"       : "pnoeric/discourse-api-php",
-  "description": "Discourse API library for PHP (based the library from discoursehosting)",
+  "description": "Discourse API library for PHP",
   "license"    : "GPL-2.0-or-later",
+  "homepage"   : "https://github.com/pnoeric/discourse-api-php",
   "keywords"   : [
     "discourse"
   ],
@@ -11,9 +12,9 @@
       "email": "richp10@gmail.com"
     },
     {
-      "name"    : "pnoeric",
+      "name"    : "Eric Mueller",
       "email"   : "eric@ericmueller.org",
-      "homepage": "https://github.com/pnoeric/discourse-api-php"
+      "homepage": "https://github.com/pnoeric/"
     }
   ],
   "require"    : {
