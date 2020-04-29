@@ -42,7 +42,7 @@ $api = new \pnoeric\DiscourseAPI($hostname, $key);
 // and you're off and running!
 // look through the src/DiscourseAPI.php file for methods
 // for example:
-$api->getTopTopics();
+$results = $api->getTopTopics();
 
 // if you aren't sure what the API results, just look at it:
 $results = $api->getUserByDiscourseId( 1 );
