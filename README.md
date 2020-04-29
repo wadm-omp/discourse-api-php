@@ -5,11 +5,11 @@ This is a composer packaged version of the PHP library for accessing the Discour
 # Features
 
 * Supports header-based authentication (required by Discourse as of April 2020)
-* Package includes test suite for developers
+* Includes test suite for developers
  
 ### History
 
-Originally as published by DiscourseHosting at https://github.com/discoursehosting/discourse-api-php
+Originally as published by DiscourseHosting at https://github.com/discoursehosting/discourse-api-php.
 
 With contributions from:
 
@@ -19,7 +19,33 @@ With contributions from:
 * https://github.com/kazad/discourse-api-php
 * https://github.com/timolaine/discourse-api-php
 
-Many methods added and major refactor by Eric Mueller March/April 2020, now lives at https://github.com/pnoeric/discourse-api-php
+Many methods added and major refactor by Eric Mueller March/April 2020, now lives at https://github.com/pnoeric/discourse-api-php.
+
+# How to Use
+
+Just include it with Composer, and then:
+
+```PHP
+$hostname = 'forums.example.com';
+
+// set this up in Discourse first
+$key = 'my-secret-discourse-api-key';
+
+$api = new \pnoeric\DiscourseAPI($hostname, $key);
+
+// and you're off and running!
+$api->getTopTopics();
+
+// if you aren't sure what the API results, just look at it:
+$results = $api->getUserByDiscourseId( 1 );
+var_dump($results);
+```
+
+For more examples, check out `tests/DiscourseApiTest.php`.
+
+# For Developers
+
+I'd love to see your changes and improvements to this library! Please feel free to submit a pull request, and please include a new test if you are adding/refactoring methods.
 
 ## Testing
 

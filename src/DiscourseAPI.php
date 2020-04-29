@@ -502,14 +502,13 @@ class DiscourseAPI {
 	 * suspend user - by user ID
 	 *
 	 * @param int      $userId
-	 *
 	 * @param DateTime $until
-	 * @param          $reason
+	 * @param string   $reason
 	 *
 	 * @return mixed HTTP return code and API return object
 	 * @throws Exception
 	 */
-	public function suspendUserById( int $userId, DateTime $until, $reason ) {
+	public function suspendUserById( int $userId, DateTime $until, string $reason ) {
 
 		// format 'c' = 2004-02-12T15:19:21+00:00
 		$date = substr( $until->format( 'c' ), 0, 10 );
@@ -945,14 +944,14 @@ class DiscourseAPI {
 		// throw exceptions for common problems
 		if ( $res->http_code == 429 ) {
 			throw new Exception(
-				"Rate limit on $httpMethod request: $url",
+				"Rate limit on $httpMethod request: $url " . json_encode( $query ),
 				429
 			);
 		}
 
 		if ( $res->http_code == 404 ) {
 			throw new Exception(
-				"URL endpoint not found on $httpMethod request: $url",
+				"URL endpoint not found on $httpMethod request: $url " . json_encode( $query ),
 				404
 			);
 		}
