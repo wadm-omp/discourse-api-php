@@ -4,7 +4,9 @@
   "license"    : "GPL-2.0-or-later",
   "homepage"   : "https://github.com/pnoeric/discourse-api-php",
   "keywords"   : [
-    "discourse"
+    "discourse",
+    "php",
+    "api"
   ],
   "authors"    : [
     {
