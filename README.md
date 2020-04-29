@@ -44,12 +44,12 @@ $api = new \pnoeric\DiscourseAPI($hostname, $key);
 // for example:
 $results = $api->getTopTopics();
 
-// if you aren't sure what the API results, just look at it:
+// if you aren't sure what the API returns from a call, just look at it:
 $results = $api->getUserByDiscourseId( 1 );
 var_dump($results);
-```
 
-For more examples, check out `tests/DiscourseApiTest.php`.
+// you can also get a lot of info from the tests (see tests/DiscourseApiTest.php).
+```
 
 # For Developers
 
