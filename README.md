@@ -2,6 +2,10 @@
 
 This is a composer packaged version of the PHP library for accessing the Discourse API.
 
+More about Discourse: https://www.discourse.org/
+
+Discourse API docs: https://docs.discourse.org/
+
 # Features
 
 * Supports header-based authentication (required by Discourse as of April 2020)
