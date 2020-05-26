@@ -32,7 +32,7 @@ class DiscourseApiTest extends TestCase {
 	 */
 	private $testJpegPath;
 
-	protected function setUp() {
+	public function setUp(): void {
 		// load environment vars from .env file
 		// see https://github.com/vlucas/phpdotenv
 		$dotEnv = Dotenv\Dotenv::createImmutable( __DIR__ );
