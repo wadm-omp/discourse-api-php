@@ -592,6 +592,7 @@ class DiscourseAPI {
 
 	/**
 	 * getUserByUsername
+	 * this returns user_options but not full record with SSO bits
 	 *
 	 * @param string $userName username of user
 	 *
@@ -605,6 +606,7 @@ class DiscourseAPI {
 	/**
 	 * get discourse user by their internal ID -
 	 * note that this returns FULL record, including single_sign_on_record
+	 * but does not include user options
 	 *
 	 * @param int $userId discourse (non-external) ID
 	 *
@@ -857,6 +859,22 @@ class DiscourseAPI {
 		];
 
 		return $this->_putRequest( '/admin/site_settings/' . $siteSetting, [ $params ] );
+	}
+
+	/**
+	 * set email digests setting for a specific user
+	 * (same as user prefs option "When I don’t visit here, send me an email summary of popular topics and replies")
+	 *
+	 * @param string $discourseUsername
+	 * @param bool   $value
+	 *
+	 * @return stdClass
+	 * @throws Exception
+	 */
+	public function setEmailDigestUserSetting( string $discourseUsername, bool $value ): stdClass {
+		$params['email_digests'] = $value ? 'true' : 'false';
+
+		return $this->_putRequest( '/users/' . $discourseUsername . '.json', [ $params ] );
 	}
 
 

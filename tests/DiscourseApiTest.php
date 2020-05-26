@@ -592,4 +592,29 @@ class DiscourseApiTest extends TestCase {
 
 		// var_dump( $res );
 	}
+
+
+	/**
+	 * @throws Exception
+	 * @group emailsettings
+	 */
+	function testChangeEmailDigestSettings() {
+		$res = $this->DiscourseAPI->getUserByUsername( $this->testAdminUsername );
+
+		$this->assertIsObject( $res->apiresult );
+		$this->assertEquals( 200, $res->http_code );
+
+		// set email digests to true
+		$this->DiscourseAPI->setEmailDigestUserSetting( $this->testAdminUsername, true );
+
+		// and confirm the setting "took"
+		$res = $this->DiscourseAPI->getUserByUsername( $this->testAdminUsername );
+		$this->assertEquals( true, $res->apiresult->user->user_option->email_digests );
+
+		// now set it to false
+		$this->DiscourseAPI->setEmailDigestUserSetting( $this->testAdminUsername, false );
+
+		$res = $this->DiscourseAPI->getUserByUsername( $this->testAdminUsername );
+		$this->assertEquals( false, $res->apiresult->user->user_option->email_digests );
+	}
 }
