@@ -661,14 +661,16 @@ class DiscourseAPI {
 	 * @throws Exception
 	 */
 	public function getDiscourseUserFromExternalId( int $externalID, bool $getFullAdminRecord = true ) {
-		$res = $this->_getRequest( "/users/by-external/{$externalID}.json" );
+		$res        = $this->_getRequest( "/users/by-external/{$externalID}.json" );
+		$userObject = $res->apiresult->user;
 
 		if ( $getFullAdminRecord && is_object( $res ) && $res->apiresult->user->id ) {
 			// now call this to get the FULL record, with single_sign_on_record if there, but this drops ignored_users
-			$res = $this->getUserByDiscourseId( $res->apiresult->user->id );
+			$res        = $this->getUserByDiscourseId( $res->apiresult->user->id );
+			$userObject = $res->apiresult;
 		}
 
-		return $res->apiresult;
+		return $userObject;
 	}
 
 	/**
