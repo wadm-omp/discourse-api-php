@@ -10,7 +10,11 @@ Discourse API docs: https://docs.discourse.org/
 
 * Supports header-based authentication (required by Discourse as of April 2020)
 * Includes test suite for developers
- 
+
+### Changelog
+
+- 2.1 - Fixing a nasty little bug
+
 ### History
 
 Originally as published by DiscourseHosting at https://github.com/discoursehosting/discourse-api-php.
