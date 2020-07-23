@@ -1301,7 +1301,7 @@ class DiscourseAPI {
 	 */
 	public function getTopTopics( string $period = 'yearly', string $userName = 'system' ): array {
 		$res = $this->_getRequest( '/top/' . $period . '.json', [], $userName );
-		$res = $res ? $res->apiresult->topic_list->topics : [];
+		$res = is_object( $res) && isset($res->apiresult->topic_list->topics) ? $res->apiresult->topic_list->topics : [];
 
 		return $res;
 	}
