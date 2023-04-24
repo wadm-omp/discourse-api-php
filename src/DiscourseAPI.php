@@ -1305,4 +1305,12 @@ class DiscourseAPI {
 
 		return $res;
 	}
+
+    /**
+     * @throws Exception
+     */
+    public function getSite(): stdClass
+    {
+        return $this->_getRequest('/site.json');
+    }
 }
