@@ -1014,7 +1014,7 @@ class DiscourseAPI {
 			if ( isset( $paramArray['group'] ) && is_array( $paramArray['group'] ) ) {
 				$query = http_build_query( $paramArray );
 			} else {
-				if ( is_array( $paramArray[0] ) ) {
+				if ( isset( $paramArray[0] ) && is_array( $paramArray[0] ) ) {
 					foreach ( $paramArray[0] as $param => $value ) {
 						$query .= $param . '=' . urlencode( $value ) . '&';
 					}
