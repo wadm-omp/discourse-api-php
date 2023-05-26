@@ -21,6 +21,7 @@ namespace pnoeric;
 use CURLFile;
 use DateTime;
 use Exception;
+use RuntimeException;
 use stdClass;
 
 use function is_int;
@@ -1305,4 +1306,18 @@ class DiscourseAPI {
 
 		return $res;
 	}
+
+    /**
+     * @throws Exception
+     */
+    public function getSite(): stdClass
+    {
+        $result = $this->_getRequest('/site.json');
+
+        if (!is_object($result) || !isset($result->apiresult)) {
+            throw new RuntimeException('Failed fetching site info');
+        }
+
+        return $result->apiresult;
+    }
 }
