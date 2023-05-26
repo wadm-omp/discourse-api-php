@@ -22,6 +22,7 @@ use CURLFile;
 use DateTime;
 use Exception;
 use RuntimeException;
+use pnoeric\Exception\EmptyResponseBodyException;
 use stdClass;
 
 use function is_int;
@@ -954,6 +955,13 @@ class DiscourseAPI {
 		$body           = curl_exec( $ch );
 		$httpResultCode = curl_getinfo( $ch, CURLINFO_HTTP_CODE );
 		curl_close( $ch );
+
+        if ($body === false) {
+            throw new EmptyResponseBodyException(
+                    "Empty response from $httpMethod request: $url " . json_encode($query),
+                    $httpResultCode
+            );
+        }
 
 		// build return object
 		$res            = new stdClass();
